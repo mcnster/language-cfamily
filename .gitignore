@@ -14,3 +14,9 @@ cabal.sandbox.config
 *.aux
 *.hp
 .stack-work/
+examples/ComputeSize
+examples/DumpAst
+examples/ParseAndPrint
+examples/ScanFile
+examples/SearchDef
+examples/TypeCheck
