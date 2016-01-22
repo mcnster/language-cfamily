@@ -1,5 +1,5 @@
-import Language.Haskell.Pretty (prettyPrint)
-import Language.Haskell.Parser (ParseResult(ParseOk, ParseFailed), parseModule)
+import Language.Haskell.Exts.Pretty (prettyPrint)
+import Language.Haskell.Exts.Parser (ParseResult(ParseOk, ParseFailed), parseModule)
 
 import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(ExitFailure))
@@ -15,12 +15,12 @@ usageMsg prg = render $ text "Usage:" <+> text prg <+> hsep (map text ["CPP_OPTI
 
 main :: IO ()
 main = do
-	let usageErr = (hPutStrLn stderr (usageMsg "./ParseAndPrint") >> exitWith (ExitFailure 1))
-	args <- getArgs
-	when (length args < 1) usageErr
-	let (opts,input_file) = (init args, last args)
-	ast <- errorOnLeftM "Parse Error" $ parseCFile (newGCC "gcc") Nothing opts input_file
-	putStrLn $ (decorate (shows (fmap (const ShowPlaceholder) ast)) "")
+   let usageErr = (hPutStrLn stderr (usageMsg "./ParseAndPrint") >> exitWith (ExitFailure 1))
+   args <- getArgs
+   when (length args < 1) usageErr
+   let (opts,input_file) = (init args, last args)
+   ast <- errorOnLeftM "Parse Error" $ parseCFile (newGCC "gcc") Nothing opts input_file
+   putStrLn $ (decorate (shows (fmap (const ShowPlaceholder) ast)) "")
 
 errorOnLeft :: (Show a) => String -> (Either a b) -> IO b
 errorOnLeft msg = either (error . ((msg ++ ": ")++).show) return

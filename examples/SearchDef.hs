@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 -- Simple example demonstrating the syntax - semantic interplay: search and print definitions
 module Main where
 import System.Environment ; import System.FilePath

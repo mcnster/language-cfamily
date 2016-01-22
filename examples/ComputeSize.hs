@@ -1,4 +1,4 @@
-{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE PatternGuards,FlexibleContexts #-}
 -- /ComputeSize 'comp' compute_size.c | gcc -x c -o compute_size_hs - && ./compute_size_hs 
 module Main where
 import System.Environment ; import System.IO
