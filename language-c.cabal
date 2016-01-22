@@ -55,7 +55,7 @@ Library
     else
         cpp-options: -DNO_BYTESTRING
     Build-Tools:    happy, alex
-
+    Ghc-options: -Wall
     Hs-Source-Dirs: src
     Exposed-Modules:
                       -- top-level

@@ -1,3 +1,8 @@
+Changes since 0.4.7 in darcs repository.
+==========================================================================
+Thu Feb 21 2016
+  * Compiles with all warnings turned on (-Wall). [MCN]
+
 Changes since 0.4.1
 ==========================================================================
 Thu Feb 28 2013

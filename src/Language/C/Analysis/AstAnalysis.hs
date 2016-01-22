@@ -30,14 +30,11 @@ import Language.C.Analysis.SemError
 import Language.C.Analysis.SemRep
 import Language.C.Analysis.TravMonad
 import Language.C.Analysis.ConstEval
-import Language.C.Analysis.Debug
-import Language.C.Analysis.DefTable (DefTable, globalDefs, defineScopedIdent,
-                                     defineLabel, inFileScope, lookupTag,
+import Language.C.Analysis.DefTable (globalDefs, defineLabel, inFileScope,
                                      lookupLabel, insertType, lookupType)
 import Language.C.Analysis.DeclAnalysis
 import Language.C.Analysis.TypeUtils
 import Language.C.Analysis.TypeCheck
-import Language.C.Analysis.TypeConversions
 
 import Language.C.Data
 import Language.C.Pretty
@@ -50,9 +47,6 @@ import Text.PrettyPrint.HughesPJ
 
 import Control.Monad
 import Prelude hiding (reverse)
-import Data.Either (rights)
-import Data.Foldable (foldrM)
-import Data.List hiding (reverse)
 import qualified Data.Map as Map
 import Data.Maybe
 
@@ -92,7 +86,7 @@ analyseFunDef :: (MonadTrav m) => CFunDef -> m ()
 analyseFunDef (CFunDef declspecs declr oldstyle_decls stmt node_info) = do
     -- analyse the declarator
     var_decl_info <- analyseVarDecl' True declspecs declr oldstyle_decls Nothing
-    let (VarDeclInfo name is_inline storage_spec attrs ty declr_node) = var_decl_info
+    let (VarDeclInfo name is_inline storage_spec attrs ty _) = var_decl_info
     when (isNoName name) $ astError node_info "NoName in analyseFunDef"
     let ident = identOfVarName name
     -- improve incomplete type
@@ -146,16 +140,16 @@ analyseDecl is_local decl@(CDecl declspecs declrs node)
                  -- XXX: if Initializer becomes different from CInit, this
                  -- will have to change.
                  vardeclInfo init_opt
-        init_opt' <- mapMaybeM init_opt (tInit typ)
+        _ <- mapMaybeM init_opt (tInit typ)
         return ()
-    analyseVarDeclr _ _ (Nothing,_,_)         = astError node "abstract declarator in object declaration"
-    analyseVarDeclr _ _ (_,_,Just bitfieldSz) = astError node "bitfield size in object declaration"
+    analyseVarDeclr _ _ (Nothing,_,_     ) = astError node "abstract declarator in object declaration"
+    analyseVarDeclr _ _ (_      ,_,Just _) = astError node "bitfield size in object declaration"
 
 -- | Analyse a typedef
 analyseTypeDef :: (MonadTrav m) => Bool -> [CDeclSpec] -> CDeclr -> NodeInfo -> m ()
 analyseTypeDef handle_sue_def declspecs declr node_info = do
     -- analyse the declarator
-    (VarDeclInfo name is_inline storage_spec attrs ty declr_node) <- analyseVarDecl' handle_sue_def declspecs declr [] Nothing
+    (VarDeclInfo name is_inline storage_spec attrs ty _) <- analyseVarDecl' handle_sue_def declspecs declr [] Nothing
     checkValidTypeDef is_inline storage_spec attrs
     when (isNoName name) $ astError node_info "NoName in analyseTypeDef"
     let ident = identOfVarName name
@@ -173,7 +167,7 @@ analyseTypeDef handle_sue_def declspecs declr node_info = do
 -- This function won't raise an Trav error if the declaration is incompatible with the existing one,
 -- this case is handled in 'handleFunDef'.
 computeFunDefStorage :: (MonadTrav m) => Ident -> StorageSpec -> m Storage
-computeFunDefStorage _ (StaticSpec b)  = return$ FunLinkage InternalLinkage
+computeFunDefStorage _ (StaticSpec _)  = return $ FunLinkage InternalLinkage
 computeFunDefStorage ident other_spec  = do
   obj_opt <- lookupObject ident
   let defaultSpec = FunLinkage ExternalLinkage
@@ -251,6 +245,7 @@ extVarDecl (VarDeclInfo var_name is_inline storage_spec attrs typ node_info) ini
                -- warning, external definition
                Just _  -> do warn $ badSpecifierError node_info "Both initializer and `extern` specifier given - treating as definition"
                              return $ (Static ExternalLinkage thread_local, True)
+       globalStorage _ = error "AstAnalysis.hs:extVarDecl unhandled pattern in globalStorage"
        hasFunDef dt = any (isFuncDef . snd) (Map.toList $ gObjs $ globalDefs dt)
        isFuncDef (FunctionDef fd) = not $ isInline $ declAttrs fd
        isFuncDef _ = False
@@ -280,7 +275,7 @@ localVarDecl (VarDeclInfo var_name is_inline storage_spec attrs typ node_info) i
       | otherwise =
           do old_decl <- lookupObject ident
              return (maybe (Static ExternalLinkage thread_local) declStorage old_decl,False)
-    localStorage s = astError node_info "bad storage specifier for local"
+    localStorage _ = astError node_info "bad storage specifier for local"
 
 defineParams :: MonadTrav m => NodeInfo -> VarDecl -> m ()
 defineParams ni decl =
@@ -394,7 +389,7 @@ tStmt c (CFor i g inc s _)       =
      either (maybe (return ()) checkExpr) (analyseDecl True) i
      maybe (return ()) (checkGuard c) g
      maybe (return ()) checkExpr inc
-     tStmt (LoopCtx : c) s
+     _ <- tStmt (LoopCtx : c) s
      leaveBlockScope
      return voidType
   where checkExpr e = tExpr c RValue e >> return ()
@@ -482,7 +477,7 @@ tExpr c side e =
            Just t -> return t
            Nothing ->
              do t <- tExpr' c side e
-                withDefTable (\dt -> (t, insertType dt n t))
+                withDefTable (\dt' -> (t, insertType dt' n t))
     Nothing -> tExpr' c side e
 
 -- | Typecheck an expression, with information about whether it
@@ -528,7 +523,7 @@ tExpr' c side (CCond e1 me2 e3 ni)     =
          do t2 <- tExpr c side e2
             conditionalType' ni t2 t3
        Nothing -> conditionalType' ni t1 t3
-tExpr' c side (CMember e m deref ni)   =
+tExpr' c _ (CMember e m deref ni)   =
   do t <- tExpr c RValue e
      bt <- if deref then typeErrorOnLeft ni (derefType t) else return t
      fieldType ni m bt
@@ -541,11 +536,11 @@ tExpr' c side (CCast d e ni)           =
      return dt
 tExpr' c side (CSizeofExpr e ni)       =
   do when (side == LValue) $ typeError ni "sizeof as lvalue"
-     tExpr c RValue e
+     _ <- tExpr c RValue e
      return size_tType
 tExpr' c side (CAlignofExpr e ni)      =
   do when (side == LValue) $ typeError ni "alignof as lvalue"
-     tExpr c RValue e
+     _ <- tExpr c RValue e
      return size_tType
 tExpr' c side (CComplexReal e ni)      = complexBaseType ni c side e
 tExpr' c side (CComplexImag e ni)      = complexBaseType ni c side e
@@ -563,7 +558,7 @@ tExpr' _ LValue (CAlignofType _ ni)    =
   typeError ni "alignoftype as lvalue"
 tExpr' _ LValue (CSizeofType _ ni)     =
   typeError ni "sizeoftype as lvalue"
-tExpr' _ side (CVar i ni)              =
+tExpr' _ _ (CVar i ni)              =
   lookupObject i >>=
   maybe (typeErrorOnLeft ni $ notFound i) (return . declType)
 tExpr' _ _ (CConst c)                  = constType c
@@ -612,7 +607,7 @@ tExpr' c _ (CCall fe args ni)          =
                  case canonicalType pty of
                    DirectType (TyComp ctr) _ _ ->
                      do td <- lookupSUE (nodeInfo arg) (sueRef ctr)
-                        ms <- tagMembers (nodeInfo arg) td
+                        _ <- tagMembers (nodeInfo arg) td
                         {-
                         when (null $ rights $ matches ms) $
                              astError (nodeInfo arg) $
@@ -620,12 +615,14 @@ tExpr' c _ (CCall fe args ni)          =
                              "of transparent union"
                         -}
                         return ()
+{-
                      where matches =
                              map (\d -> assignCompatible
                                         CAssignOp
                                         (snd d)
                                         aty
                                  )
+-}
                    _ -> astError (nodeInfo arg)
                         "non-composite has __transparent_union__ attribute"
                False -> assignCompatible' (nodeInfo arg) CAssignOp pty aty
@@ -650,7 +647,7 @@ tExpr' c _ (CStatExpr s _)             =
      return t
 
 tInitList :: MonadTrav m => NodeInfo -> Type -> CInitList -> m ()
-tInitList ni t@(ArrayType (DirectType (TyIntegral TyChar) _ _) _ _ _)
+tInitList _ (ArrayType (DirectType (TyIntegral TyChar) _ _) _ _ _)
              [([], CInitExpr e@(CConst (CStrConst _ _)) _)] =
   tExpr [] RValue e >> return ()
 tInitList ni t@(ArrayType _ _ _ _) initList =
@@ -662,7 +659,7 @@ tInitList ni t@(DirectType (TyComp ctr) _ _) initList =
      ms <- tagMembers ni td
      let default_ds = map (\m -> CMemberDesig (fst m) ni) ms
      checkInits t default_ds initList
-tInitList ni (PtrType (DirectType TyVoid _ _) _ _ ) _ =
+tInitList _ (PtrType (DirectType TyVoid _ _) _ _ ) _ =
           return () -- XXX: more checking
 tInitList _ t [([], i)] = tInit t i >> return ()
 tInitList ni t _ = typeError ni $ "initializer list for type: " ++ pType t
@@ -676,7 +673,7 @@ checkInits t dds ((ds, i) : is) =
                       (dd' : rest, []) -> return (rest, [dd'])
                       (_, d : _) -> return (advanceDesigList dds d, ds)
      t' <- tDesignator t ds'
-     tInit t' i
+     _ <- tInit t' i
      checkInits t dds' is
 
 advanceDesigList :: [CDesignator] -> CDesignator -> [CDesignator]
@@ -695,14 +692,15 @@ tDesignator (ArrayType bt _ _ _) (CRangeDesig e1 e2 ni : ds) =
   do tExpr [] RValue e1 >>= checkIntegral' ni
      tExpr [] RValue e2 >>= checkIntegral' ni
      tDesignator bt ds
-tDesignator (ArrayType _ _ _ _) (d : ds) =
+tDesignator (ArrayType _ _ _ _) (d : _) =
   typeError (nodeInfo d) "member designator in array initializer"
 tDesignator t@(DirectType (TyComp _) _ _) (CMemberDesig m ni : ds) =
   do mt <- fieldType ni m t
      tDesignator (canonicalType mt) ds
-tDesignator t@(DirectType (TyComp _) _ _) (d : _) =
+tDesignator (DirectType (TyComp _) _ _) (d : _) =
   typeError (nodeInfo d) "array designator in compound initializer"
 tDesignator t [] = return t
+tDesignator _ _ = error "AstAnalysis.hs:tDesignator unhandled pattern"
 
 tInit :: MonadTrav m => Type -> CInit -> m Initializer
 tInit t i@(CInitExpr e ni) =
@@ -734,5 +732,5 @@ hasTypeDef declspecs =
         (True,specs') -> Just specs'
         (False,_)     -> Nothing
     where
-    hasTypeDefSpec (CStorageSpec (CTypedef n)) (_,specs) = (True, specs)
+    hasTypeDefSpec (CStorageSpec (CTypedef _)) (_,specs) = (True, specs)
     hasTypeDefSpec spec (b,specs) = (b,spec:specs)

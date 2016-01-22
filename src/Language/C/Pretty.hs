@@ -18,7 +18,7 @@ module Language.C.Pretty (
     -- * Testing
     prettyUsingInclude
 ) where
-import Data.List (partition,nub,isSuffixOf)
+import Data.List (isSuffixOf)
 import qualified Data.Set as Set
 import Text.PrettyPrint.HughesPJ
 import Debug.Trace {- for warnings -}

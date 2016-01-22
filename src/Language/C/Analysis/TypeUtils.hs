@@ -36,15 +36,7 @@ module Language.C.Analysis.TypeUtils (
 import Language.C.Analysis.SemRep
 import Language.C.Syntax.Constants
 
-instance Eq TypeQuals where
- (==) (TypeQuals c1 v1 r1) (TypeQuals c2 v2 r2) =
-    c1 == c2 && v1 == v2 && r1 == r2
-
-instance Ord TypeQuals where
-  (<=) (TypeQuals c1 v1 r1) (TypeQuals c2 v2 r2) =
-    c1 <= c2 && v1 <= v2 && r1 <= r2
-
--- | Constructor for a simple integral type.
+ -- | Constructor for a simple integral type.
 integral :: IntType -> Type
 integral ty = DirectType (TyIntegral ty) noTypeQuals noAttributes
 
