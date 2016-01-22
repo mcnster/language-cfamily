@@ -21,7 +21,6 @@ import Language.C.Data.InputStream
 import System.Exit
 import System.Directory
 import System.FilePath
-import System.Environment
 import System.IO
 import Control.Exception
 import Control.Monad
@@ -54,9 +53,11 @@ data CppArgs = CppArgs {
         outputFile :: Maybe FilePath
     }
 
+{-
 -- | Cpp arguments that only specify the input file name.
 cppFile :: FilePath -> CppArgs
 cppFile input_file = CppArgs { cppOptions = [], extraOptions = [], cppTmpDir = Nothing, inputFile = input_file, outputFile = Nothing }
+-}
 
 -- | use the given preprocessor arguments without analyzing them
 rawCppArgs :: [String] -> FilePath -> CppArgs

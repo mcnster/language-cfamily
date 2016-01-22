@@ -54,12 +54,10 @@ Stmt,Expr,Initializer,AsmBlock,
 where
 import Language.C.Data
 import Language.C.Syntax
-import Language.C.Syntax.Constants
 
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Generics
-import Text.PrettyPrint.HughesPJ
 
 -- | accessor class : struct\/union\/enum names
 class HasSUERef a where
@@ -70,9 +68,9 @@ class HasCompTyKind a where
     compTag :: a -> CompTyKind
 
 -- | Composite type definitions (tags)
-data TagDef =  CompDef CompType	  --definition
-     	       | EnumDef EnumType      -- enum definition
-               deriving (Typeable, Data {-! ,CNode !-})
+data TagDef = CompDef CompType   -- definition
+            | EnumDef EnumType   -- enum definition
+     deriving (Typeable, Data {-! ,CNode !-})
 
 instance HasSUERef TagDef where
     sueRef (CompDef ct) = sueRef ct
@@ -111,10 +109,10 @@ instance (Declaration a, Declaration b) => Declaration (Either a b) where
 
 -- | identifiers, typedefs and enumeration constants (namespace sum)
 data IdentDecl = Declaration Decl           -- ^ object or function declaration
-	             | ObjectDef ObjDef           -- ^ object definition
-	             | FunctionDef FunDef         -- ^ function definition
-	             | EnumeratorDef Enumerator   -- ^ definition of an enumerator
-               deriving (Typeable, Data {-! ,CNode !-})
+               | ObjectDef ObjDef           -- ^ object definition
+               | FunctionDef FunDef         -- ^ function definition
+               | EnumeratorDef Enumerator   -- ^ definition of an enumerator
+     deriving (Typeable, Data {-! ,CNode !-})
 
 instance Declaration IdentDecl where
   getVarDecl (Declaration decl) = getVarDecl decl
@@ -476,6 +474,14 @@ instance Declaration Enumerator where
 -- | Type qualifiers: constant, volatile and restrict
 data TypeQuals = TypeQuals { constant :: Bool, volatile :: Bool, restrict :: Bool }
     deriving (Typeable, Data)
+
+instance Eq TypeQuals where
+   (==) (TypeQuals c1 v1 r1) (TypeQuals c2 v2 r2) =
+           c1 == c2 && v1 == v2 && r1 == r2
+
+instance Ord TypeQuals where
+   (<=) (TypeQuals c1 v1 r1) (TypeQuals c2 v2 r2) =
+           c1 <= c2 && v1 <= v2 && r1 <= r2
 
 -- | no type qualifiers
 noTypeQuals :: TypeQuals

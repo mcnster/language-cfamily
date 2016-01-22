@@ -257,6 +257,7 @@ readCOctal s@('0':r) =
     case r of
         (c:_) | isDigit c -> readCInteger OctalRepr r
         _                 -> readCInteger DecRepr s
+readCOctal _ = error "Lexer.x:readCOctal unhandled pattern"
 
 -- We use the odd looking list of string patterns here rather than normal
 -- string literals since GHC converts the latter into a sequence of string
@@ -371,8 +372,8 @@ ignoreAttribute :: P ()
 ignoreAttribute = skipTokens (0::Int)
   where skipTokens :: Int -> P ()
         skipTokens n = do
-          tok <- lexToken' False
-          case tok of
+          tok' <- lexToken' False
+          case tok' of
             CTokRParen _ | n == 1    -> return ()
                          | otherwise -> skipTokens (n-1)
             CTokLParen _             -> skipTokens (n+1)
@@ -408,7 +409,7 @@ unescapeMultiChars _ = error "Unexpected end of multi-char constant"
 {-# INLINE token_ #-}
 -- token that ignores the string
 token_ :: Int -> (PosLength -> CToken) -> Position -> Int -> InputStream -> P CToken
-token_ len tok pos _ _ = return (tok (pos,len))
+token_ len tok' pos _ _ = return (tok' (pos,len))
 
 {-# INLINE token_fail #-}
 -- error token
@@ -421,15 +422,15 @@ token_fail errmsg pos _ _ =   failP pos [ "Lexical Error !", errmsg ]
 -- token that uses the string
 token :: (PosLength -> a -> CToken) -> (String -> a)
       -> Position -> Int -> InputStream -> P CToken
-token tok read pos len str = return (tok (pos,len) (read $ takeChars len str))
+token tok' read' pos len str = return (tok' (pos,len) (read' $ takeChars len str))
 
 {-# INLINE token_plus #-}
 -- token that may fail
 token_plus :: (PosLength -> a -> CToken) -> (String -> Either String a)
       -> Position -> Int -> InputStream -> P CToken
-token_plus tok read pos len str =
-  case read (takeChars len str) of Left err -> failP pos [ "Lexical error ! ", err ]
-                                   Right ok -> return $! tok (pos,len) ok
+token_plus tok' read' pos len str =
+  case read' (takeChars len str) of Left err -> failP pos [ "Lexical error ! ", err ]
+                                    Right ok -> return $! tok' (pos,len) ok
 
 -- -----------------------------------------------------------------------------
 -- The input type
@@ -463,17 +464,17 @@ alexMove pos _    = incPos pos 1
 lexicalError :: P a
 lexicalError = do
   pos <- getPos
-  (c,cs) <- liftM takeChar getInput
+  (c,_) <- liftM takeChar getInput
   failP pos
         ["Lexical error !",
          "The character " ++ show c ++ " does not fit here."]
 
 parseError :: P a
 parseError = do
-  tok <- getLastToken
-  failP (posOf tok)
+  tok' <- getLastToken
+  failP (posOf tok')
         ["Syntax error !",
-         "The symbol `" ++ show tok ++ "' does not fit here."]
+         "The symbol `" ++ show tok' ++ "' does not fit here."]
 
 -- there is a problem with ignored tokens here (that aren't skipped)
 -- consider
@@ -498,20 +499,20 @@ lexToken' modifyCache = do
     AlexEOF -> do
         handleEofToken
         return CTokEof
-    AlexError inp' -> lexicalError
-    AlexSkip  (pos', inp') len -> do
+    AlexError _ -> lexicalError
+    AlexSkip  (pos', inp') _ -> do
         setPos pos'
         setInput inp'
         lexToken' modifyCache
     AlexToken (pos', inp') len action -> do
         setPos pos'
         setInput inp'
-        tok <- action pos len inp
-        when modifyCache $ setLastToken tok
-        return tok
+        tok' <- action pos len inp
+        when modifyCache $ setLastToken tok'
+        return tok'
 
 lexC :: (CToken -> P a) -> P a
 lexC cont = do
-  tok <- lexToken
-  cont tok
+  tok' <- lexToken
+  cont tok'
 }

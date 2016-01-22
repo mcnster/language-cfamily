@@ -56,7 +56,6 @@ module Language.C.Syntax.AST (
   -- * Annoated type class
   Annotated(..)
 ) where
-import Data.List
 import Language.C.Syntax.Constants
 import Language.C.Syntax.Ops
 import Language.C.Data.Ident
