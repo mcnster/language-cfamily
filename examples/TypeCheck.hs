@@ -25,5 +25,4 @@ processFile lang cppOpts file =
 main :: IO ()
 main =
   do args <- getArgs
-     let (cppOpts, files) = partition (isPrefixOf "-") args
-     mapM_ (processFile GNU99 cppOpts) files
+     processFile GNU99 (init args) (last args)
