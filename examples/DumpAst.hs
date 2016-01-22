@@ -15,7 +15,7 @@ usageMsg prg = render $ text "Usage:" <+> text prg <+> hsep (map text ["CPP_OPTI
 
 main :: IO ()
 main = do
-   let usageErr = (hPutStrLn stderr (usageMsg "./ParseAndPrint") >> exitWith (ExitFailure 1))
+   let usageErr = (hPutStrLn stderr (usageMsg "./DumpAst") >> exitWith (ExitFailure 1))
    args <- getArgs
    when (length args < 1) usageErr
    let (opts,input_file) = (init args, last args)
