@@ -1,7 +1,17 @@
-Changes since 0.4.7 in darcs repository.
+Changes since v0.4.7 in upstream darcs repository.
 ==========================================================================
-Thu Feb 21 2016
-  * Compiles with all warnings turned on (-Wall). [MCN]
+Fri Jan 22 2016
+  * Fixed incorrect usage message in examples/DumpAst.hs
+  * Added parsing for '__int128' type (no analysis yet)
+  * Added parsing for 'asm goto { "<asms>" : : : : <gotos>);'
+  * Modified examples/TypeCheck.hs to check only 1 file at a time 
+
+Thu Jan 21 2016
+  * Updated Language.C code to be compatible with ghc-7.10.3
+  * Compiles with all warnings turned on (-Wall)
+  * Updated README to reflect this project
+  * TAG: v0.4.7
+
 
 Changes since 0.4.1
 ==========================================================================
