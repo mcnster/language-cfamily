@@ -1,39 +1,48 @@
-= Language.C =
+ABOUT
 
-Language.C is a parser and pretty-printer framework for C99 and the extensions of gcc.
+Language.C is a parser, analyser and pretty-printer library for Haskell.
+It supports C99 and some extensions of gcc.
 
-See http://www.sivity.net/projects/language.c/
+This package is an experimental hack based on the latest darcs repository
+files at http://code.haskell.org/language-c.  As it develops, there will
+be more information here.
 
-== Build and Install ==
+For differences between this package and the upstream darcs sources, see
+ChangeLog.
 
-cabal install
 
--- or --
+INSTALLATION
 
-runhaskell Setup.hs configure FLAGS
-runhaskell Setup.hs build
-runhaskell Setup.hs install
+	cabal install
+
+	-- or --
+
+	runhaskell Setup.hs configure FLAGS
+	runhaskell Setup.hs build
+	runhaskell Setup.hs install
 
 Provide the set of flags passing
  --flags="<flags-seperated-by-space>"
 to configure.
 
-== Compatibility ==
 
-Tested with ghc-7.2 (Ubuntu) and ghc-7.4 (Ubuntu).
-It is recommended to use the most recent platform release: http://hackage.haskell.org/platform/.
+COMPATIBILITY
 
-== Sources ==
+Tested with ghc-7.10.3 on Arch Linux x64.
 
-see src/README
 
-== Examples ==
+EXAMPLES
 
-A couple of small examples are available in /examples
+Some small examples are available in examples/.
 
-== Testing ==
 
-A couple of regression tests can be run via
-> cd test/harness; make
+TESTING
+
+Some regression tests can be run via:
+
+	cd test/harness; make
 
 For more tests, see test/README.
+
+
+https://github.com/micknelso/language-c
