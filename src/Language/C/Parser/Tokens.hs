@@ -142,6 +142,7 @@ data GnuCTok = GnuCAttrTok              -- `__attribute__'
              | GnuCTyCompat             -- `__builtin_types_compatible_p'
              | GnuCComplexReal          -- `__real__'
              | GnuCComplexImag          -- `__imag__'
+             | GnuCInt128               -- `__int128'
 
 instance Pos CToken where
   posOf = fst . posLenOfTok
@@ -342,6 +343,7 @@ instance Show CToken where
   showsPrec _ (CTokGnuC GnuCExtTok  _) = showString "__extension__"
   showsPrec _ (CTokGnuC GnuCComplexReal _) = showString "__real__"
   showsPrec _ (CTokGnuC GnuCComplexImag  _) = showString "__imag__"
+  showsPrec _ (CTokGnuC GnuCInt128 _) = showString "__int128"
   showsPrec _ (CTokGnuC GnuCVaArg    _) = showString "__builtin_va_arg"
   showsPrec _ (CTokGnuC GnuCOffsetof _) = showString "__builtin_offsetof"
   showsPrec _ (CTokGnuC GnuCTyCompat _) = showString "__builtin_types_compatible_p"

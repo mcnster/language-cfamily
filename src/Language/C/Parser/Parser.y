@@ -232,6 +232,7 @@ tyident		{ CTokTyIdent _ $$ }		-- `typedef-name' identifier
 "__extension__"	{ CTokGnuC GnuCExtTok  _ }	-- special GNU C tokens
 "__real__"        { CTokGnuC GnuCComplexReal _ }
 "__imag__"        { CTokGnuC GnuCComplexImag _ }
+"__int128"        { CTokGnuC GnuCInt128 _ }
 -- special GNU C builtin 'functions' that actually take types as parameters:
 "__builtin_va_arg"		{ CTokGnuC GnuCVaArg    _ }
 "__builtin_offsetof"		{ CTokGnuC GnuCOffsetof _ }
@@ -841,6 +842,7 @@ basic_type_name
   | unsigned			{% withNodeInfo $1 $ CUnsigType }
   | "_Bool"			{% withNodeInfo $1 $ CBoolType }
   | "_Complex"			{% withNodeInfo $1 $ CComplexType }
+  | "__int128"       {% withNodeInfo $1 $ CInt128Type }
 
 
 -- A mixture of type qualifiers, storage class and basic type names in any

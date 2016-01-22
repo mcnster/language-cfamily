@@ -27,7 +27,7 @@
 --
 --  * We also recognize GNU C `__attribute__', `__extension__', `__complex__',
 --    `__const',  `__const__', `__imag', `__imag__', `__inline', `__inline__',
---    `__real', `__real__, `__restrict', and `__restrict__'.
+--    `int128', `__real', `__real__, `__restrict', and `__restrict__'.
 --
 --  * Any line starting with `#pragma' is ignored.
 --
@@ -285,11 +285,12 @@ label __label__
 (CTokGnuC GnuCExtTok) __extension__
 (CTokGnuC GnuCComplexReal) __real __real__
 (CTokGnuC GnuCComplexImag) __imag __imag__
+(CTokGnuC GnuCInt128) __int128
 (CTokGnuC GnuCVaArg) __builtin_va_arg
 (CTokGnuC GnuCOffsetof) __builtin_offsetof
 (CTokGnuC GnuCTyCompat) __builtin_types_compatible_p
 -}
--- Tokens: alignof __alignof __alignof__ asm __asm __asm__ __attribute __attribute__ auto _Bool break __builtin_offsetof __builtin_types_compatible_p __builtin_va_arg case char _Complex __complex__ const __const __const__ continue default do double else enum __extension__ extern float for goto if __imag __imag__ inline __inline __inline__ int __label__ long __real __real__ register __restrict __restrict__ return short signed __signed __signed__ sizeof static struct switch __thread typedef typeof __typeof __typeof__ union unsigned void volatile __volatile __volatile__ while
+-- Tokens: alignof __alignof __alignof__ asm __asm __asm__ __attribute __attribute__ auto _Bool break __builtin_offsetof __builtin_types_compatible_p __builtin_va_arg case char _Complex __complex__ const __const __const__ continue default do double else enum __extension__ extern float for goto if __imag __imag__ inline __inline __inline__ int __int128 __label__ long __real __real__ register __restrict __restrict__ return short signed __signed __signed__ sizeof static struct switch __thread typedef typeof __typeof __typeof__ union unsigned void volatile __volatile __volatile__ while
 idkwtok ('_' : 'B' : 'o' : 'o' : 'l' : []) = tok 5 CTokBool
 idkwtok ('_' : 'C' : 'o' : 'm' : 'p' : 'l' : 'e' : 'x' : []) = tok 8 CTokComplex
 idkwtok ('_' : '_' : 'a' : 'l' : 'i' : 'g' : 'n' : 'o' : 'f' : []) = tok 9 CTokAlignof
@@ -326,6 +327,7 @@ idkwtok ('i' : 'f' : []) = tok 2 CTokIf
 idkwtok ('_' : '_' : 'i' : 'm' : 'a' : 'g' : []) = tok 6 (CTokGnuC GnuCComplexImag)
 idkwtok ('_' : '_' : 'i' : 'm' : 'a' : 'g' : '_' : '_' : []) = tok 8 (CTokGnuC GnuCComplexImag)
 idkwtok ('_' : '_' : 'i' : 'n' : 'l' : 'i' : 'n' : 'e' : []) = tok 8 CTokInline
+idkwtok ('_' : '_' : 'i' : 'n' : 't' : '1' : '2' : '8' : []) = tok 8 (CTokGnuC GnuCInt128)
 idkwtok ('i' : 'n' : 'l' : 'i' : 'n' : 'e' : []) = tok 6 CTokInline
 idkwtok ('_' : '_' : 'i' : 'n' : 'l' : 'i' : 'n' : 'e' : '_' : '_' : []) = tok 10 CTokInline
 idkwtok ('i' : 'n' : 't' : []) = tok 3 CTokInt

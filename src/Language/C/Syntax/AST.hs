@@ -422,6 +422,7 @@ data CTypeSpecifier a
   | CCharType    a
   | CShortType   a
   | CIntType     a
+  | CInt128Type  a
   | CLongType    a
   | CFloatType   a
   | CDoubleType  a
@@ -1027,6 +1028,7 @@ instance (CNode t1) => CNode (CTypeSpecifier t1) where
         nodeInfo (CCharType d) = nodeInfo d
         nodeInfo (CShortType d) = nodeInfo d
         nodeInfo (CIntType d) = nodeInfo d
+        nodeInfo (CInt128Type d) = nodeInfo d
         nodeInfo (CLongType d) = nodeInfo d
         nodeInfo (CFloatType d) = nodeInfo d
         nodeInfo (CDoubleType d) = nodeInfo d
@@ -1049,6 +1051,7 @@ instance Functor CTypeSpecifier where
         fmap _f (CCharType a1) = CCharType (_f a1)
         fmap _f (CShortType a1) = CShortType (_f a1)
         fmap _f (CIntType a1) = CIntType (_f a1)
+        fmap _f (CInt128Type a1) = CInt128Type (_f a1)
         fmap _f (CLongType a1) = CLongType (_f a1)
         fmap _f (CFloatType a1) = CFloatType (_f a1)
         fmap _f (CDoubleType a1) = CDoubleType (_f a1)
@@ -1068,6 +1071,7 @@ instance Annotated CTypeSpecifier where
         annotation (CCharType n) = n
         annotation (CShortType n) = n
         annotation (CIntType n) = n
+        annotation (CInt128Type n) = n
         annotation (CLongType n) = n
         annotation (CFloatType n) = n
         annotation (CDoubleType n) = n
@@ -1084,6 +1088,7 @@ instance Annotated CTypeSpecifier where
         amap f (CCharType a_1) = CCharType (f a_1)
         amap f (CShortType a_1) = CShortType (f a_1)
         amap f (CIntType a_1) = CIntType (f a_1)
+        amap f (CInt128Type a_1) = CInt128Type (f a_1)
         amap f (CLongType a_1) = CLongType (f a_1)
         amap f (CFloatType a_1) = CFloatType (f a_1)
         amap f (CDoubleType a_1) = CDoubleType (f a_1)
