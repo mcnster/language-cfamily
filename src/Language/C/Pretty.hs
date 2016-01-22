@@ -161,17 +161,19 @@ instance Pretty CStat where
     prettyPrec _ p = pretty p
 
 instance Pretty CAsmStmt where
-    pretty (CAsmStmt tyQual expr outOps inOps clobbers _) =
+    pretty (CAsmStmt tyQual expr outOps inOps clobbers gotos _) =
         ii $ text "__asm__" <+>
              maybeP pretty tyQual <>
              parens asmStmt <> semi
       where
         asmStmt = pretty expr <+>
-                  (if all null [inOps,outOps] && null clobbers then empty else ops)
+                  (if all null [inOps,outOps] && null clobbers && null gotos then empty else ops)
         ops     =  text ":" <+> hcat (punctuate comma (map pretty outOps)) <+>
                    text ":" <+> hcat (punctuate comma (map pretty inOps)) <+>
-                   (if null clobbers then empty else clobs)
-        clobs   =  text ":" <+> hcat (punctuate comma (map pretty clobbers))
+                   (if null clobbers && null gotos then empty else clobs)
+        clobs   =  text ":" <+> hcat (punctuate comma (map pretty clobbers)) <+>
+                   (if null gotos then empty else gotos')
+        gotos'  =  text ":" <+> hcat (punctuate comma (map identP gotos))
 
 instance Pretty CAsmOperand where
     -- asm_operand :~ [operand-name] "constraint" ( expr )

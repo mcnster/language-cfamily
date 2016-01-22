@@ -496,16 +496,18 @@ jump_statement
 asm_statement :: { CAsmStmt }
 asm_statement
   : asm maybe_type_qualifier '(' string_literal ')' ';'
-  	{% withNodeInfo $1 $ CAsmStmt $2 $4 [] [] [] }
+  	{% withNodeInfo $1 $ CAsmStmt $2 $4 [] [] [] [] }
 
   | asm maybe_type_qualifier '(' string_literal ':' asm_operands ')' ';'
-  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 [] [] }
+  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 [] [] [] }
 
   | asm maybe_type_qualifier '(' string_literal ':' asm_operands ':' asm_operands ')' ';'
-  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 $8 [] }
+  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 $8 [] [] }
 
   | asm maybe_type_qualifier '(' string_literal ':' asm_operands ':' asm_operands ':' asm_clobbers ')' ';'
-  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 $8 (reverse $10) }
+  	{% withNodeInfo $1 $ CAsmStmt $2 $4 $6 $8 $10 [] }
+  | asm maybe_type_qualifier goto '(' string_literal ':' asm_operands ':' asm_operands ':' asm_clobbers ':' asm_gotos ')' ';'
+   {% withNodeInfo $1 $ CAsmStmt $2 $5 $7 $9 $11 (reverse $13) }
 
 
 maybe_type_qualifier :: { Maybe CTypeQual }
@@ -530,10 +532,18 @@ asm_operand
   | '[' tyident ']' string_literal '(' expression ')' {% withNodeInfo $1 $ CAsmOperand (Just $2) $4 $6 }
 
 
-asm_clobbers :: { Reversed [CStrLit] }
+asm_clobbers :: { [CStrLit] }
 asm_clobbers
-  : string_literal			        { singleton $1 }
-  | asm_clobbers ',' string_literal	{ $1 `snoc` $3 }
+  : {- empty -}                              { [] }
+  | nonnull_asm_clobbers                     { reverse $1 }
+
+nonnull_asm_clobbers :: { Reversed [CStrLit] }
+  : string_literal                           { singleton $1 }
+  | nonnull_asm_clobbers ',' string_literal  { $1 `snoc` $3 }
+
+asm_gotos :: { Reversed [Ident] }
+asm_gotos
+  : identifier_list                          { $1 }
 
 {-
 ---------------------------------------------------------------------------------------------------------------

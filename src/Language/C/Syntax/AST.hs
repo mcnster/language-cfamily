@@ -329,23 +329,23 @@ instance Functor CStatement where
 
 -- | GNU Assembler statement
 --
--- > CAssemblyStatement type-qual? asm-expr out-ops in-ops clobbers _
+-- > CAssemblyStatement type-qual? asm-expr out-ops in-ops clobbers gotos _
 --
 -- is an inline assembler statement.
 -- The only type-qualifier (if any) allowed is /volatile/.
 -- @asm-expr@ is the actual assembler epxression (a string), @out-ops@ and @in-ops@ are the input
 -- and output operands of the statement.
 -- @clobbers@ is a list of registers which are clobbered when executing the assembler statement
-type CAsmStmt = CAssemblyStatement NodeInfo
-data CAssemblyStatement a
-  = CAsmStmt
-    (Maybe (CTypeQualifier a)) -- maybe volatile
-    (CStringLiteral a)         -- assembler expression (String)
-    [CAssemblyOperand a]       -- output operands
-    [CAssemblyOperand a]       -- input operands
-    [CStringLiteral a]         -- Clobbers
-    a
-    deriving (Show, Data,Typeable {-! ,CNode ,Functor ,Annotated !-})
+type CAsmStmt             = CAssemblyStatement NodeInfo
+data CAssemblyStatement a = CAsmStmt
+                              (Maybe (CTypeQualifier a)) -- maybe volatile
+                              (CStringLiteral a)         -- assembler expression (String)
+                              [CAssemblyOperand a]       -- output operands
+                              [CAssemblyOperand a]       -- input operands
+                              [CStringLiteral a]         -- Clobbers
+                              [Ident]                    -- gotos
+                              a
+     deriving (Show, Data,Typeable {-! ,CNode ,Functor ,Annotated !-})
 
 -- | Assembler operand
 --
@@ -899,24 +899,25 @@ instance Annotated CStatement where
 
 
 instance (CNode t1) => CNode (CAssemblyStatement t1) where
-        nodeInfo (CAsmStmt _ _ _ _ _ n) = nodeInfo n
+        nodeInfo (CAsmStmt _ _ _ _ _ _ n) = nodeInfo n
 
 instance (CNode t1) => Pos (CAssemblyStatement t1) where
         posOf x = posOf (nodeInfo x)
 
 
 instance Functor CAssemblyStatement where
-        fmap _f (CAsmStmt a1 a2 a3 a4 a5 a6)
+        fmap _f (CAsmStmt a1 a2 a3 a4 a5 a6 a7)
           = CAsmStmt (fmap (fmap _f) a1) (fmap _f a2) (fmap (fmap _f) a3)
               (fmap (fmap _f) a4)
               (fmap (fmap _f) a5)
-              (_f a6)
+              a6
+              (_f a7)
 
 
 instance Annotated CAssemblyStatement where
-        annotation (CAsmStmt _ _ _ _ _ n) = n
-        amap f (CAsmStmt a_1 a_2 a_3 a_4 a_5 a_6)
-          = CAsmStmt a_1 a_2 a_3 a_4 a_5 (f a_6)
+        annotation (CAsmStmt _ _ _ _ _ _ n) = n
+        amap f (CAsmStmt a_1 a_2 a_3 a_4 a_5 a_6 a_7)
+          = CAsmStmt a_1 a_2 a_3 a_4 a_5 a_6 (f a_7)
 
 
 instance (CNode t1) => CNode (CAssemblyOperand t1) where
