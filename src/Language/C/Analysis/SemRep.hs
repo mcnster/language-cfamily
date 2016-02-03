@@ -195,6 +195,8 @@ data DeclEvent =
        -- ^ a type definition
      | AsmEvent AsmBlock
        -- ^ assembler block
+     | CallEvent Ident (Either Ident CExpr) NodeInfo
+       -- ^ call expression
      deriving ({-! CNode !-})
 
 -- * Declarations and definitions
@@ -592,6 +594,7 @@ instance CNode DeclEvent where
         nodeInfo (LocalEvent d) = nodeInfo d
         nodeInfo (TypeDefEvent d) = nodeInfo d
         nodeInfo (AsmEvent d) = nodeInfo d
+        nodeInfo (CallEvent _ _ d) = nodeInfo d
 
 instance Pos DeclEvent where
         posOf x = posOf (nodeInfo x)

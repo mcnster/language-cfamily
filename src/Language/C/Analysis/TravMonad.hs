@@ -27,7 +27,7 @@ module Language.C.Analysis.TravMonad (
     -- * Handling declarations
     handleTagDecl, handleTagDef, handleEnumeratorDef, handleTypeDef,
     handleObjectDef,handleFunDef,handleVarDecl,handleParamDecl,
-    handleAsmBlock,
+    handleAsmBlock, handleCall,
     -- * Symbol table scope modification
     enterPrototypeScope,leavePrototypeScope,
     enterFunctionScope,leaveFunctionScope,
@@ -62,6 +62,10 @@ import Language.C.Analysis.DefTable hiding (enterBlockScope,leaveBlockScope,
                                             enterFunctionScope,leaveFunctionScope)
 import qualified Language.C.Analysis.DefTable as ST
 
+import Language.C.Syntax.AST
+
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.IntMap (insert)
 import Data.Maybe
 import Control.Monad (liftM, ap)
@@ -237,6 +241,14 @@ handleFunDef ident fun_def = do
               defineScopedIdentWhen isDeclaration ident def
     checkVarRedef def redecl
     handleDecl (DeclEvent def)
+
+handleCall
+   :: (MonadTrav m)
+   => Ident
+   -> Either Ident CExpr
+   -> NodeInfo
+   -> m ()
+handleCall namei e ni = handleDecl (CallEvent namei e ni)
 
 isDeclaration :: IdentDecl -> Bool
 isDeclaration (Declaration _) = True
@@ -442,7 +454,15 @@ instance MonadCError (Trav s) where
 instance MonadTrav (Trav s) where
     -- handling declarations and definitions
     handleDecl d = ($ d) =<< gets doHandleExtDecl
+{-
+instance (MonadIO m) => MonadIO (TravT s m) where
+    liftIO = lift . liftIO
 
+instance MonadTrans (Trav s) where
+    lift m = Trav $ \ s -> do
+        a <- m
+        return (a, s)
+-}
 -- | The variety of the C language to accept. Note: this is not yet enforced.
 data CLanguage = C89 | C99 | GNU89 | GNU99
 

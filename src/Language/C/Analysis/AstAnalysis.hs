@@ -285,16 +285,103 @@ defineParams ni decl =
     Just params -> mapM_ handleParamDecl params
 
 analyseFunctionBody :: (MonadTrav m) => NodeInfo -> VarDecl -> CStat -> m Stmt
-analyseFunctionBody node_info decl s@(CCompound localLabels items _) =
+analyseFunctionBody node_info decl@(VarDecl (VarName namei _) _ _) s@(CCompound localLabels items _) =
   do enterFunctionScope
      mapM_ (withDefTable . defineLabel) (localLabels ++ getLabels s)
      defineParams node_info decl
      -- record parameters
-     mapM_ (tBlockItem [FunCtx decl]) items
+     --mapM_ (tBlockItem [FunCtx decl]) items
+     mapM_ (ctCBlockItem namei) items
      leaveFunctionScope
      return s -- XXX: bogus
 
 analyseFunctionBody _ _ s = astError (nodeInfo s) "Function body is no compound statement"
+
+ctCBlockItem
+   :: (MonadTrav m)
+   => Ident
+   -> CBlockItem
+   -> m ()
+ctCBlockItem fn (CBlockStmt s) = ctCStat fn s
+ctCBlockItem fn (CBlockDecl d) = ctCDecl fn d
+
+ctCStat
+   :: (MonadTrav m)
+   => Ident
+   -> CStat
+   -> m ()
+ctCStat fn (CLabel    _           s1  _      _) = ctCStat fn s1
+ctCStat fn (CCase     e1          s1         _) = ctCExpr fn e1 >> ctCStat fn s1
+ctCStat fn (CCases    e1          e2  s1     _) = ctCExpr fn e1 >> ctCExpr fn e2 >> ctCStat fn s1
+ctCStat fn (CDefault  s1                     _) = ctCStat fn s1
+ctCStat fn (CExpr     me1                    _) = ume fn me1
+ctCStat fn (CCompound _           bis        _) = mapM_ (ctCBlockItem fn) bis
+ctCStat fn (CIf       e1          s1  ms2    _) = ctCExpr fn e1 >> ctCStat fn s1 >> ums fn ms2
+ctCStat fn (CSwitch   e1          s1         _) = ctCExpr fn e1 >> ctCStat fn s1
+ctCStat fn (CWhile    e1          s1  _      _) = ctCExpr fn e1 >> ctCStat fn s1
+ctCStat fn (CFor      (Left me1) me2 me3 s1  _) = ume fn me1    >> ume fn me2 >> ume fn me3 >> ctCStat fn s1
+ctCStat fn (CFor      (Right d1) me2 me3 s1  _) = ctCDecl fn d1 >> ume fn me2 >> ume fn me3 >> ctCStat fn s1
+ctCStat _  (CGoto     _                      _) = return ()
+ctCStat fn (CGotoPtr  e1                     _) = ctCExpr fn e1
+ctCStat _  (CCont                            _) = return ()
+ctCStat _  (CBreak                           _) = return ()
+ctCStat fn (CReturn   me1                    _) = ume fn me1
+ctCStat _  (CAsm      _                      _) = return ()
+
+ctCExpr
+   :: (MonadTrav m)
+   => Ident
+   -> CExpr
+   -> m ()
+ctCExpr fn (CComma    es1 _) = mapM_ (ctCExpr fn) es1
+ctCExpr fn (CAssign _ e1 e2 _) = ctCExpr fn e1 >> ctCExpr fn e2
+ctCExpr fn (CCond     e1 me2 e3 _) = ctCExpr fn e1 >> ume fn me2 >> ctCExpr fn e3
+ctCExpr fn (CBinary _ e1 e2     _) = ctCExpr fn e1 >> ctCExpr fn e2
+ctCExpr fn (CCast   _ e1        _) = ctCExpr fn e1
+ctCExpr fn (CUnary  _ e1        _) = ctCExpr fn e1
+ctCExpr fn (CSizeofExpr  e1 _) = ctCExpr fn e1
+ctCExpr _  (CSizeofType  _  _) = return ()
+ctCExpr fn (CAlignofExpr e1 _) = ctCExpr fn e1
+ctCExpr _  (CAlignofType _  _) = return ()
+ctCExpr fn (CComplexReal e1 _) = ctCExpr fn e1
+ctCExpr fn (CComplexImag e1 _) = ctCExpr fn e1
+ctCExpr fn (CIndex       e1 e2 _) = ctCExpr fn e1 >> ctCExpr fn e2
+ctCExpr fn (CCall        (CVar i _) es2 ni) = mapM_ (ctCExpr fn) es2 >> handleCall fn (Left  i ) ni
+ctCExpr fn (CCall        e1         es2 ni) = mapM_ (ctCExpr fn) es2 >> handleCall fn (Right e1) ni
+ctCExpr fn (CMember      e1 _ _ _) = ctCExpr fn e1
+ctCExpr _  (CVar         _  _) = return ()
+ctCExpr _  (CConst       _   ) = return ()
+ctCExpr _  (CCompoundLit _ _ _) = return ()
+ctCExpr fn (CStatExpr    s1 _) = ctCStat fn s1
+ctCExpr _  (CLabAddrExpr _  _) = return ()
+ctCExpr _  (CBuiltinExpr _) = return ()
+
+ctCDecl
+   :: (MonadTrav m)
+   => Ident
+   -> CDecl
+   -> m ()
+ctCDecl fn (CDecl _ diss _) = mapM_ unDiss diss
+   where
+      unDiss (_, Just (CInitExpr e1 _), _) = ctCExpr fn e1
+      unDiss _                             = return ()
+
+ume
+   :: (MonadTrav m)
+   => Ident
+   -> Maybe CExpr
+   -> m ()
+ume fn (Just e) = ctCExpr fn e
+ume _  Nothing  = return ()
+
+ums
+   :: (MonadTrav m)
+   => Ident
+   -> Maybe CStat
+   -> m ()
+ums fn (Just s) = ctCStat fn s
+ums _  Nothing  = return ()
+
 
 data StmtCtx = FunCtx VarDecl
              | LoopCtx
