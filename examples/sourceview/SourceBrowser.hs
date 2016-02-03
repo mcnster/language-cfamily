@@ -6,8 +6,8 @@ import Control.Monad
 import Data.Tree (Tree)
 import qualified Data.Tree as Tree
 
-import Language.C.Data.Position
-import Language.C.Data.Node
+import Language.Data.Position
+import Language.Data.Node
 import GenericTree
 
 runGTK :: [Tree AstNode] -> FilePath -> IO ()

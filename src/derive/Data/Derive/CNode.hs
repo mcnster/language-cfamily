@@ -8,7 +8,7 @@ module Data.Derive.CNode(makeCNode) where
 --   X a_1 .. a_n, and exactly one a_k is a polymorphic variable, then return (nodeInfo a_k)
 data Test3 a = A Test1 a Test1 | B a Test2 | C Test1 a deriving (Show {-! ,CNode !-})
 -- Else If we have a data constructor
---   X a_1 .. a_n, and exactly one a_k is a Language.C.Data.NodeInfo, then return that a_k
+--   X a_1 .. a_n, and exactly one a_k is a Language.Data.NodeInfo, then return that a_k
 data Test1 = X Int NodeInfo |  Y NodeInfo String | Z Int NodeInfo Integer deriving (Show {-! ,CNode !-})
 
 -- Else If we have a data constructor
@@ -25,7 +25,7 @@ makeCNode :: Derivation
 makeCNode = derivationCustom "CNode" (runDeriveM . genNodeInst)
 
 nodeInfoTypeName :: [Char]
-nodeInfoTypeName = "Language.C.Data.Node.NodeInfo"
+nodeInfoTypeName = "Language.Data.Node.NodeInfo"
 
 genNodeInst :: FullDataDecl -> DeriveM [Decl]
 genNodeInst (_,dat) = do

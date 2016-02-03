@@ -7,8 +7,8 @@ import System.IO (hPutStrLn, stderr)
 import Control.Monad (when)
 import Text.PrettyPrint.HughesPJ (render, text, (<+>), hsep)
 
-import Language.C (parseCFile)
-import Language.C.System.GCC (newGCC)
+import Language.CFamily.C (parseCFile)
+import Language.CFamily.System.GCC (newGCC)
 
 usageMsg :: String -> String
 usageMsg prg = render $ text "Usage:" <+> text prg <+> hsep (map text ["CPP_OPTIONS","input_file.c"])

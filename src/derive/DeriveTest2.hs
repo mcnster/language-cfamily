@@ -1,7 +1,7 @@
 -- For all type variables a, we require (CNode a)
 
 -- If we have a data constructor
---   X a_1 .. a_n, and exactly one a_k is a Language.C.Data.NodeInfo, then return that a_k
+--   X a_1 .. a_n, and exactly one a_k is a Language.Data.NodeInfo, then return that a_k
 data Test1 = X Int NodeInfo |  Y NodeInfo String | Z Int NodeInfo Integer deriving (Show {-! ,CNode !-})
 
 -- If we have a data constructor

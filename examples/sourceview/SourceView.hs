@@ -15,7 +15,7 @@ import Data.Maybe (fromMaybe)
 
 
 import Language.C              -- simple API
-import Language.C.Data.Node
+import Language.Data.Node
 import GenericTree
 import SourceBrowser
 

@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module DeriveTest where
-import Language.C.Data.Node
-import Language.C.Data.Position
+import Language.Data.Node
+import Language.Data.Position
 import Data.Data
 data ExplicitNodeInfo = ExplicitNodeInfo1 NodeInfo Int
                       | ExplicitNodeInfo2 Int NodeInfo
