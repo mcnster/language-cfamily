@@ -12,6 +12,7 @@ import Data.List
 import Data.Maybe
 
 import Language.CFamily.C hiding (empty)             -- simple API
+import Language.CFamily.Data hiding (empty)
 import Language.CFamily.C.Analysis     -- analysis API
 import Language.CFamily.C.Analysis.Debug -- debugging printer for analysis
 import Language.CFamily.System.GCC   -- preprocessor used
@@ -40,7 +41,6 @@ main = do
                               False -> let (pat,args') = (last args, init args)
                                        in (Just pat,init args',last args')
 
-    putStrLn input_file
     -- parse
     ast <- errorOnLeftM "Parse Error" $
       parseCFile (newGCC "gcc") Nothing opts input_file
@@ -74,8 +74,9 @@ errorOnLeftM msg action = action >>= errorOnLeft msg
 
 declTrace :: DeclEvent -> String
 declTrace event = render $ case event of
-                                CallEvent name (Left i) n -> (pretty name) <+> text ": " <+> pretty i <+> (text $ show $ fromJust $ fileOfNode n)
-                                CallEvent name (Right i) n -> (pretty name) <+> text ": " <+> pretty i <+> (text $ show $ fromJust $ fileOfNode n)
+                                CallEvent name (Left i) n -> pretty i <+> (text $ show $ fromJust $ fileOfNode n)
+                                CallEvent name (Right i) n -> pretty i <+> (text $ show $ fromJust $ fileOfNode n)
+                                DeclEvent i@(FunctionDef _) -> (text "Decl:" <+> (pretty i) <+> file i)
                                 _                           -> empty
 {-
                                 TagEvent tag_def     -> (text "Tag:" <+> (pretty tag_def) <+> file tag_def)
@@ -84,7 +85,7 @@ declTrace event = render $ case event of
                                 LocalEvent ident_decl -> (text "Local:" <+> (pretty ident_decl)  <+> file ident_decl)
                                 TypeDefEvent tydef   -> (text "Typedef:" <+> (pretty tydef) <+> file tydef)
                                 AsmEvent block       -> (text $ "Assembler block")
+-}
     where
     file :: (CNode a) => a -> Doc
     file = text . show . posOfNode . nodeInfo
--}
