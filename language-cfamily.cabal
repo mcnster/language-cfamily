@@ -60,7 +60,7 @@ Library
     Exposed-Modules:
                       -- top-level
                       Language.CFamily.C
-                      Language.CFamily.CPP
+                      Language.CFamily.CXX
                       -- data
                       Language.CFamily.Data
                       Language.CFamily.Data.DefTable

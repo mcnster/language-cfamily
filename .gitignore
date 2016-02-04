@@ -20,3 +20,4 @@ examples/ParseAndPrint
 examples/ScanFile
 examples/SearchDef
 examples/TypeCheck
+examples/MkCallTree

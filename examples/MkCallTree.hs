@@ -11,10 +11,10 @@ import Text.PrettyPrint.HughesPJ
 import Data.List
 import Data.Maybe
 
-import Language.C              -- simple API
-import Language.C.Analysis     -- analysis API
-import Language.C.Analysis.Debug -- debugging printer for analysis
-import Language.C.System.GCC   -- preprocessor used
+import Language.CFamily.C hiding (empty)             -- simple API
+import Language.CFamily.C.Analysis     -- analysis API
+import Language.CFamily.C.Analysis.Debug -- debugging printer for analysis
+import Language.CFamily.System.GCC   -- preprocessor used
 
 
 usageMsg :: String -> String
@@ -40,6 +40,7 @@ main = do
                               False -> let (pat,args') = (last args, init args)
                                        in (Just pat,init args',last args')
 
+    putStrLn input_file
     -- parse
     ast <- errorOnLeftM "Parse Error" $
       parseCFile (newGCC "gcc") Nothing opts input_file

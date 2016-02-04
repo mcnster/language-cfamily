@@ -23,17 +23,25 @@ module Language.CFamily.C (
     module Language.CFamily.C.Parser,
 )
 where
+
 import Language.CFamily.Data
 import Language.CFamily.C.Syntax
 import Language.CFamily.C.Pretty
 import Language.CFamily.C.Parser
+import Language.CFamily.C.Parser.Lexer
 import Language.CFamily.System.Preprocess
 
 -- | preprocess (if necessary) and parse a C source file
 --
 --   > Synopsis: parseCFile preprocesssor tmp-dir? cpp-opts file
 --   > Example:  parseCFile (newGCC "gcc") Nothing ["-I/usr/include/gtk-2.0"] my-gtk-exts.c
-parseCFile :: (Preprocessor cpp) => cpp -> (Maybe FilePath) -> [String] -> FilePath -> IO (Either ParseError CTranslUnit)
+parseCFile 
+   :: (Preprocessor cpp) 
+   => cpp 
+   -> (Maybe FilePath) 
+   -> [String] 
+   -> FilePath 
+   -> IO (Either ParseError CTranslUnit)
 parseCFile cpp tmp_dir_opt args input_file = do
     input_stream <- if not (isPreprocessed input_file)
                         then  let cpp_args = (rawCppArgs args input_file) { cppTmpDir = tmp_dir_opt }
