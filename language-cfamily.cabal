@@ -1,110 +1,102 @@
-Name:           language-cfamily
-Version:        0.4.7
-Cabal-Version:  >= 1.6
-Build-Type:     Simple
-License:        BSD3
-License-File:   LICENSE
-Copyright:      LICENSE
-Author:         AUTHORS
-Maintainer:     benedikt.huber@gmail.com
-Stability:      experimental
-Homepage:       http://www.sivity.net/projects/language.c/
-Bug-reports:    http://www.sivity.net/projects/language.c/
-
-Synopsis:       Analysis and generation of C code
-Description:    Language C is a haskell library for the analysis and generation of C code.
-                It features a complete, well tested parser and pretty printer for all of C99 and a large
-                set of GNU extensions.
-Category:       Language
-
-Extra-Source-Files: AUTHORS AUTHORS.c2hs ChangeLog README
-                    src/Language/C/Parser/Lexer.x
-                    src/Language/C/Parser/Parser.y
+Name:                   language-cfamily
+Version:                0.4.7
+Cabal-Version:          >= 1.6
+Build-Type:             Simple
+License:                BSD3
+License-File:           LICENSE
+Copyright:              LICENSE
+Author:                 AUTHORS
+Maintainer:             micknelso@gmail.com
+Stability:              experimental
+Homepage:               https://github.com/micknelso/language-cfamily
+Bug-Reports:            https://github.com/micknelso/language-cfamily/issues
+-- Package-Url:
+Synopsis:               Library for analysing C and C++ programs
+Description:            A Haskell library for parsing, analysing, and pretty
+                        printing C and C++ code.
+Category:               Language
+Tested-With:            GHC == 7.10.3
+Extra-Source-Files:     AUTHORS
+                        AUTHORS.c2hs
+                        ChangeLog
+                        README
+                        src/Language/CFamily/C/Parser/Lexer.x
+                        src/Language/CFamily/C/Parser/Parser.y
+-- extra-doc-files:
+-- data-files:
+-- data-dir:
+-- extra-tmp-files:
 
 Source-Repository head
-  type:     darcs
-  location: http://code.haskell.org/language-c
+  Type:                 git
+  Location:             https://github.com/micknelso/language-cfamily.git
+-- Tag: 
 
-Flag splitBase
-    Description: Choose the new smaller, split-up base package.
-Flag useByteStrings
-    Description: Use ByteString as InputStream datatype
-    Default: True
-Flag separateSYB
-  description: Data.Generics available in separate package.
+-- Flag useByteStrings
+--    Description:         Use ByteString as InputStream datatype
+--    Default:             True
 
 Library
-    Extensions: CPP, DeriveDataTypeable, PatternGuards, BangPatterns, ExistentialQuantification, GeneralizedNewtypeDeriving, ScopedTypeVariables
-    Build-Depends:  filepath
+   Exposed:             True
+   Build-Depends:       array >= 0.5 && < 0.6,
+                        bytestring >= 0.10 && < 0.11,
+                        base >= 4.8 && < 4.9,
+                        containers >= 0.5 && < 0.6,
+                        directory >= 1.2 && < 1.3,
+                        filepath >= 1.4 && < 1.5,
+                        pretty >= 1.1 && < 1.2,
+                        process >= 1.2 && < 1.3,
+                        syb >= 0.6 && < 0.7
 
-    if flag(splitBase)
-        Build-Depends: base >= 3 && < 5, process, directory, array, containers, pretty
+-- If flag(useByteStrings)
+--    Build-Depends:       bytestring >= 0.10 && < 0.11
+-- Else
+--    Cpp-Options:         -DNO_BYTESTRING
 
-        If flag(separateSYB)
-          Build-Depends:
-            base >=4 && <5,
-            syb
-        Else
-          Build-Depends:
-            base <4
-    else
-        Build-Depends: base < 3
-
-    if flag(useByteStrings)
-        Build-Depends: bytestring >= 0.9.0
-    else
-        cpp-options: -DNO_BYTESTRING
-    Build-Tools:    happy, alex
-    Ghc-options: -Wall
-    Hs-Source-Dirs: src
-    Exposed-Modules:
-                      -- top-level
-                      Language.CFamily.C
-                      Language.CFamily.CXX
-                      -- data
-                      Language.CFamily.Data
-                      Language.CFamily.Data.DefTable
-                      Language.CFamily.Data.Position
-                      Language.CFamily.Data.Ident
-                      Language.CFamily.Data.Error
-                      Language.CFamily.Data.Name
-                      Language.CFamily.Data.Node
-                      Language.CFamily.Data.InputStream
-                      Language.CFamily.Data.ParserMonad
-                      Language.CFamily.Data.RList
-                      Language.CFamily.Data.TravMonad
-                      -- syntax
-                      Language.CFamily.C.Syntax
-                      Language.CFamily.C.Syntax.AST
-                      Language.CFamily.C.Syntax.Constants
-                      Language.CFamily.C.Syntax.Ops
-                      Language.CFamily.C.Syntax.Utils
-                      -- parser
-                      Language.CFamily.C.Parser
-                      -- pretty printer
-                      Language.CFamily.C.Pretty
-                      -- system
-                      Language.CFamily.System.Preprocess
-                      Language.CFamily.System.GCC
-                      -- analysis [experimental]
-                      Language.CFamily.C.Analysis
-                      Language.CFamily.C.Analysis.ConstEval
-                      Language.CFamily.C.Analysis.Builtins
-                      Language.CFamily.C.Analysis.SemError
-                      Language.CFamily.C.Analysis.SemRep
-                      Language.CFamily.C.Analysis.AstAnalysis
-                      Language.CFamily.C.Analysis.DeclAnalysis
-                      Language.CFamily.C.Analysis.Debug
-                      Language.CFamily.C.Analysis.TypeCheck
-                      Language.CFamily.C.Analysis.TypeConversions
-                      Language.CFamily.C.Analysis.TypeUtils
-                      Language.CFamily.C.Analysis.NameSpaceMap
-                      -- semrep -> code [alpha]
-                      Language.CFamily.C.Analysis.Export
-    Other-Modules:
-                      -- parser implementation
-                      Language.CFamily.C.Parser.Builtin
-                      Language.CFamily.C.Parser.Lexer
-                      Language.CFamily.C.Parser.Tokens
-                      Language.CFamily.C.Parser.Parser
+-- Extensions: 
+   Build-Tools:         happy >= 1.19.5,
+                        alex >= 3.1.7
+   Ghc-Options:         -Wall
+   Hs-Source-Dirs:      src
+   Exposed-Modules:
+                        Language.CFamily.C
+                        Language.CFamily.C.Analysis
+                        Language.CFamily.C.Analysis.AstAnalysis
+                        Language.CFamily.C.Analysis.Builtins
+                        Language.CFamily.C.Analysis.ConstEval
+                        Language.CFamily.C.Analysis.Debug
+                        Language.CFamily.C.Analysis.DeclAnalysis
+                        Language.CFamily.C.Analysis.Export
+                        Language.CFamily.C.Analysis.NameSpaceMap
+                        Language.CFamily.C.Analysis.SemError
+                        Language.CFamily.C.Analysis.SemRep
+                        Language.CFamily.C.Analysis.TypeCheck
+                        Language.CFamily.C.Analysis.TypeConversions
+                        Language.CFamily.C.Analysis.TypeUtils
+                        Language.CFamily.C.Parser
+                        Language.CFamily.C.Parser.Builtin
+                        Language.CFamily.C.Parser.Lexer
+                        Language.CFamily.C.Parser.Parser
+                        Language.CFamily.C.Parser.Tokens
+                        Language.CFamily.C.Pretty
+                        Language.CFamily.C.Syntax
+                        Language.CFamily.C.Syntax.AST
+                        Language.CFamily.C.Syntax.Constants
+                        Language.CFamily.C.Syntax.Ops
+                        Language.CFamily.C.Syntax.Utils
+                        Language.CFamily.CXX
+                        Language.CFamily.Data
+                        Language.CFamily.Data.DefTable
+                        Language.CFamily.Data.Error
+                        Language.CFamily.Data.Ident
+                        Language.CFamily.Data.InputStream
+                        Language.CFamily.Data.Name
+                        Language.CFamily.Data.Node
+                        Language.CFamily.Data.ParserMonad
+                        Language.CFamily.Data.Position
+                        Language.CFamily.Data.RList
+                        Language.CFamily.Data.TravMonad
+                        Language.CFamily.System.GCC
+                        Language.CFamily.System.Preprocess
+-- Other-Modules:
 
