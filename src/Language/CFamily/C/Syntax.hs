@@ -11,10 +11,10 @@
 -----------------------------------------------------------------------------
 module Language.CFamily.C.Syntax (
      -- * Constants
-     module Language.CFamily.C.Syntax.Constants,
+     module Language.CFamily.Constants,
      -- * Syntax tree
      module Language.CFamily.C.Syntax.AST,
 )
 where
 import Language.CFamily.C.Syntax.AST
-import Language.CFamily.C.Syntax.Constants
+import Language.CFamily.Constants

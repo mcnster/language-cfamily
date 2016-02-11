@@ -10,7 +10,7 @@
 --  Currently, only builtin type names are supported.  The only builtin type
 --  name is `__builtin_va_list', which is a builtin of GNU C.
 --
-module Language.CFamily.C.Parser.Builtin (
+module Language.CFamily.C.Builtin (
   builtinTypeNames
 ) where
 import Language.CFamily.Data.Ident (Ident, builtinIdent)

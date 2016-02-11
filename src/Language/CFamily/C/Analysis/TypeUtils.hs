@@ -34,7 +34,7 @@ module Language.CFamily.C.Analysis.TypeUtils (
 ) where
 
 import Language.CFamily.C.Analysis.SemRep
-import Language.CFamily.C.Syntax.Constants
+import Language.CFamily.Constants
 
  -- | Constructor for a simple integral type.
 integral :: IntType -> Type

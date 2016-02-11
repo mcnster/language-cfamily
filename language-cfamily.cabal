@@ -20,8 +20,10 @@ Extra-Source-Files:     AUTHORS
                         AUTHORS.c2hs
                         ChangeLog
                         README
-                        src/Language/CFamily/C/Parser/Lexer.x
-                        src/Language/CFamily/C/Parser/Parser.y
+                        src/Language/CFamily/C/Lexer.x
+                        src/Language/CFamily/C/Parser.y
+                        src/Language/CFamily/CXX/Lexer.x
+                        src/Language/CFamily/Lexer.hs-inc
 -- extra-doc-files:
 -- data-files:
 -- data-dir:
@@ -53,40 +55,39 @@ Library
 -- Else
 --    Cpp-Options:         -DNO_BYTESTRING
 
--- Extensions: 
+   Extensions:          CPP
+   Include-Dirs:        . 
+   Ghc-Options:         -Wall
    Build-Tools:         happy >= 1.19.5,
                         alex >= 3.1.7
-   Ghc-Options:         -Wall
    Hs-Source-Dirs:      src
    Exposed-Modules:
-                        Language.CFamily.C
-                        Language.CFamily.C.Analysis
-                        Language.CFamily.C.Analysis.AstAnalysis
-                        Language.CFamily.C.Analysis.Builtins
-                        Language.CFamily.C.Analysis.ConstEval
-                        Language.CFamily.C.Analysis.Debug
-                        Language.CFamily.C.Analysis.DeclAnalysis
-                        Language.CFamily.C.Analysis.Export
-                        Language.CFamily.C.Analysis.NameSpaceMap
-                        Language.CFamily.C.Analysis.SemError
-                        Language.CFamily.C.Analysis.SemRep
-                        Language.CFamily.C.Analysis.TypeCheck
-                        Language.CFamily.C.Analysis.TypeConversions
-                        Language.CFamily.C.Analysis.TypeUtils
-                        Language.CFamily.C.Parser
-                        Language.CFamily.C.Parser.Builtin
-                        Language.CFamily.C.Parser.Lexer
-                        Language.CFamily.C.Parser.Parser
-                        Language.CFamily.C.Parser.Tokens
-                        Language.CFamily.C.Pretty
-                        Language.CFamily.C.Syntax
-                        Language.CFamily.C.Syntax.AST
-                        Language.CFamily.C.Syntax.Constants
-                        Language.CFamily.C.Syntax.Ops
-                        Language.CFamily.C.Syntax.Utils
-                        Language.CFamily.CXX
+--                        Language.CFamily.C
+--                        Language.CFamily.C.Analysis
+--                        Language.CFamily.C.Analysis.AstAnalysis
+--                        Language.CFamily.C.Analysis.Builtins
+--                        Language.CFamily.C.Analysis.ConstEval
+--                        Language.CFamily.C.Analysis.Debug
+--                        Language.CFamily.C.Analysis.DeclAnalysis
+--                        Language.CFamily.C.Analysis.Export
+--                        Language.CFamily.C.Analysis.NameSpaceMap
+--                        Language.CFamily.C.Analysis.SemError
+--                        Language.CFamily.C.Analysis.SemRep
+--                        Language.CFamily.C.Analysis.TypeCheck
+--                        Language.CFamily.C.Analysis.TypeConversions
+--                        Language.CFamily.C.Analysis.TypeUtils
+                        Language.CFamily.C.Builtin
+--                        Language.CFamily.C.Lexer
+--                        Language.CFamily.C.Parser
+--                        Language.CFamily.C.Pretty
+--                        Language.CFamily.C.Syntax
+--                        Language.CFamily.C.Syntax.AST
+--                        Language.CFamily.C.Syntax.Ops
+--                        Language.CFamily.C.Syntax.Utils
+                        Language.CFamily.Constants
+                        Language.CFamily.CXX.Lexer
                         Language.CFamily.Data
-                        Language.CFamily.Data.DefTable
+--                        Language.CFamily.Data.DefTable
                         Language.CFamily.Data.Error
                         Language.CFamily.Data.Ident
                         Language.CFamily.Data.InputStream
@@ -95,8 +96,10 @@ Library
                         Language.CFamily.Data.ParserMonad
                         Language.CFamily.Data.Position
                         Language.CFamily.Data.RList
-                        Language.CFamily.Data.TravMonad
+--                        Language.CFamily.Data.TravMonad
+                        Language.CFamily.Lexer
                         Language.CFamily.System.GCC
                         Language.CFamily.System.Preprocess
+                        Language.CFamily.Token
 -- Other-Modules:
 

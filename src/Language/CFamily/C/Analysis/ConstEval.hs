@@ -6,7 +6,7 @@ import Data.Bits
 import Data.Maybe
 import qualified Data.Map as Map
 import Language.CFamily.C.Syntax.AST
-import Language.CFamily.C.Syntax.Constants
+import Language.CFamily.Constants
 import {-# SOURCE #-} Language.CFamily.C.Analysis.AstAnalysis (tExpr, ExprSide(..))
 import Language.CFamily.C.Analysis.Debug()
 import Language.CFamily.C.Analysis.DeclAnalysis

@@ -38,7 +38,7 @@ import Language.CFamily.Data
 import Language.CFamily.C.Pretty
 
 import Language.CFamily.C.Syntax.AST
-import Language.CFamily.C.Syntax.Constants
+import Language.CFamily.Constants
 import Language.CFamily.C.Syntax.Ops
 import Language.CFamily.C.Syntax.Utils
 

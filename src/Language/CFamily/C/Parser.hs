@@ -21,8 +21,8 @@ module Language.CFamily.C.Parser (
     ParseError(..)
 )
 where
-import Language.CFamily.C.Parser.Parser (parseC,translUnitP, extDeclP, statementP, expressionP)
-import Language.CFamily.C.Parser.Builtin (builtinTypeNames)
+import Language.CFamily.C.Parser (parseC,translUnitP, extDeclP, statementP, expressionP)
+import Language.CFamily.C.Builtin (builtinTypeNames)
 import Language.CFamily.Data
 
 -- | run the given parser using a new name supply and builtin typedefs

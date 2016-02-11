@@ -1,0 +1,88 @@
+idkwtok cs = \pos -> do
+   name <- getNewName
+   let len = case length cs of l -> l
+   let ident = mkIdent pos cs name
+   tyident <- isTypeIdent ident
+   if tyident
+      then
+         return (TokTyIdent (pos,len) ident)
+      else
+         return (TokIdent   (pos,len) ident)
+
+ignoreAttribute
+   :: P ()
+ignoreAttribute = skipTokens (0 :: Int)
+   where
+      skipTokens
+         :: Int
+         -> P ()
+      skipTokens n = do
+         tok' <- lexToken' False
+         case tok' of
+            TokParenR _ | n == 1    -> return ()
+                         | otherwise -> skipTokens (n-1)
+            TokParenL _             -> skipTokens (n+1)
+            _                        -> skipTokens n
+
+-- there is a problem with ignored tokens here (that aren't skipped)
+-- consider
+-- 1 > int x;
+-- 2 > LINE "ex.c" 4
+-- 4 > int y;
+-- when we get to LINE, we have [int (1,1),x (1,4)] in the token cache.
+-- Now we run
+-- > action  (pos 2,0) 14 "LINE \"ex.c\" 3\n"
+-- which in turn adjusts the position and then calls lexToken again
+-- we get `int (pos 4,0)', and have [x (1,4), int (4,1) ] in the token cache (fine)
+-- but then, we again call setLastToken when returning and get [int (4,1),int (4,1)] in the token cache (bad)
+-- to resolve this, recursive calls invoke lexToken' False.
+lexToken
+   :: P Token
+lexToken = lexToken' True
+
+lexToken'
+   :: Bool
+   -> P Token
+lexToken' modifyCache =
+   do
+      pos <- getPos
+      inp <- getInput
+      case alexScan (pos, inp) 0 of
+         AlexEOF -> do
+            handleEofToken
+            return TokEof
+         AlexError _ -> lexicalError
+         AlexSkip  (pos', inp') _ -> do
+            setPos pos'
+            setInput inp'
+            lexToken' modifyCache
+         AlexToken (pos', inp') len action -> do
+            setPos pos'
+            setInput inp'
+            tok' <- action pos len inp
+            when modifyCache $ setLastToken tok'
+            return tok'
+
+doLineDirective
+   :: Position
+   -> Int
+   -> InputStream
+   -> P Token
+doLineDirective pos len str = do
+   setPos (adjustLineDirective len (takeChars len str) pos)
+   lexToken' False
+
+doIdentifier
+   :: Position
+   -> Int
+   -> InputStream
+   -> P Token
+doIdentifier pos len str = idkwtok (takeChars len str) pos
+
+lexC
+   :: (Token -> P a)
+   -> P a
+lexC cont = do
+   tok' <- lexToken
+   cont tok'
+

@@ -28,7 +28,6 @@ import Language.CFamily.Data
 import Language.CFamily.C.Syntax
 import Language.CFamily.C.Pretty
 import Language.CFamily.C.Parser
-import Language.CFamily.C.Parser.Lexer
 import Language.CFamily.System.Preprocess
 
 -- | preprocess (if necessary) and parse a C source file
