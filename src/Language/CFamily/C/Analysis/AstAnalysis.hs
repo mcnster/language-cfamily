@@ -304,6 +304,7 @@ ctCBlockItem
    -> m ()
 ctCBlockItem fn (CBlockStmt s) = ctCStat fn s
 ctCBlockItem fn (CBlockDecl d) = ctCDecl fn d
+ctCBlockItem _  _              = error "AstAnalysis.ctCBlockItem unhandled case"
 
 ctCStat
    :: (MonadTrav m)

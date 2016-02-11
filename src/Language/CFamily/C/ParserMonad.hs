@@ -46,7 +46,6 @@ import Language.CFamily.Data.Name    (Name)
 import Language.CFamily.Data.Ident    (Ident)
 import Language.CFamily.C.Token (CToken(CTokEof))
 
-import Control.Applicative (Applicative(..))
 import Control.Monad (liftM, ap)
 import Data.Set  (Set)
 import qualified Data.Set as Set (fromList, insert, member, delete)

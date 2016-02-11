@@ -20,12 +20,10 @@ import Language.CFamily.CXX.ParserMonad
 import Language.CFamily.CXX.Token
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.InputStream
-import Language.CFamily.Data.Name
 import Language.CFamily.Data.Position
 
 import Control.Monad
 
-import Data.Bits
 import Data.Char hiding (readLitChar)
 import Data.Word
 }

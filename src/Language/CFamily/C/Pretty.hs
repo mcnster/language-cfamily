@@ -237,6 +237,7 @@ instance Pretty CTypeSpec where
     pretty (CCharType _)        = text "char"
     pretty (CShortType _)       = text "short"
     pretty (CIntType _)         = text "int"
+    pretty (CInt128Type _)      = text "__int128"
     pretty (CLongType _)        = text "long"
     pretty (CFloatType _)       = text "float"
     pretty (CDoubleType _)      = text "double"
