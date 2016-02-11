@@ -11,7 +11,7 @@
 --  C Tokens for the C lexer.
 --
 -----------------------------------------------------------------------------
-module Language.CFamily.C.Token (CToken(..), posLenOfTok, GnuCTok(..)) where
+module Language.CFamily.C.Token (Token(..), posLenOfTok, GnuTok(..)) where
 
 import Language.CFamily.Data.Position    (Position, Pos(..), PosLength)
 import Language.CFamily.Data.Ident       (Ident, identToString)
@@ -22,120 +22,120 @@ import Language.CFamily.C.Constants (CChar, CInteger, CFloat, CString)
 
 -- possible tokens (EXPORTED)
 --
-data CToken = CTokLParen   !PosLength            -- `('
-            | CTokRParen   !PosLength            -- `)'
-            | CTokLBracket !PosLength            -- `['
-            | CTokRBracket !PosLength            -- `]'
-            | CTokArrow    !PosLength            -- `->'
-            | CTokDot      !PosLength            -- `.'
-            | CTokExclam   !PosLength            -- `!'
-            | CTokTilde    !PosLength            -- `~'
-            | CTokInc      !PosLength            -- `++'
-            | CTokDec      !PosLength            -- `--'
-            | CTokPlus     !PosLength            -- `+'
-            | CTokMinus    !PosLength            -- `-'
-            | CTokStar     !PosLength            -- `*'
-            | CTokSlash    !PosLength            -- `/'
-            | CTokPercent  !PosLength            -- `%'
-            | CTokAmper    !PosLength            -- `&'
-            | CTokShiftL   !PosLength            -- `<<'
-            | CTokShiftR   !PosLength            -- `>>'
-            | CTokLess     !PosLength            -- `<'
-            | CTokLessEq   !PosLength            -- `<='
-            | CTokHigh     !PosLength            -- `>'
-            | CTokHighEq   !PosLength            -- `>='
-            | CTokEqual    !PosLength            -- `=='
-            | CTokUnequal  !PosLength            -- `!='
-            | CTokHat      !PosLength            -- `^'
-            | CTokBar      !PosLength            -- `|'
-            | CTokAnd      !PosLength            -- `&&'
-            | CTokOr       !PosLength            -- `||'
-            | CTokQuest    !PosLength            -- `?'
-            | CTokColon    !PosLength            -- `:'
-            | CTokAssign   !PosLength            -- `='
-            | CTokPlusAss  !PosLength            -- `+='
-            | CTokMinusAss !PosLength            -- `-='
-            | CTokStarAss  !PosLength            -- `*='
-            | CTokSlashAss !PosLength            -- `/='
-            | CTokPercAss  !PosLength            -- `%='
-            | CTokAmpAss   !PosLength            -- `&='
-            | CTokHatAss   !PosLength            -- `^='
-            | CTokBarAss   !PosLength            -- `|='
-            | CTokSLAss    !PosLength            -- `<<='
-            | CTokSRAss    !PosLength            -- `>>='
-            | CTokComma    !PosLength            -- `,'
-            | CTokSemic    !PosLength            -- `;'
-            | CTokLBrace   !PosLength            -- `{'
-            | CTokRBrace   !PosLength            -- `}'
-            | CTokEllipsis !PosLength            -- `...'
-            | CTokAlignof  !PosLength            -- `alignof'
+data Token = TokLParen   !PosLength            -- `('
+            | TokRParen   !PosLength            -- `)'
+            | TokLBracket !PosLength            -- `['
+            | TokRBracket !PosLength            -- `]'
+            | TokArrow    !PosLength            -- `->'
+            | TokDot      !PosLength            -- `.'
+            | TokExclam   !PosLength            -- `!'
+            | TokTilde    !PosLength            -- `~'
+            | TokInc      !PosLength            -- `++'
+            | TokDec      !PosLength            -- `--'
+            | TokPlus     !PosLength            -- `+'
+            | TokMinus    !PosLength            -- `-'
+            | TokStar     !PosLength            -- `*'
+            | TokSlash    !PosLength            -- `/'
+            | TokPercent  !PosLength            -- `%'
+            | TokAmper    !PosLength            -- `&'
+            | TokShiftL   !PosLength            -- `<<'
+            | TokShiftR   !PosLength            -- `>>'
+            | TokLess     !PosLength            -- `<'
+            | TokLessEq   !PosLength            -- `<='
+            | TokHigh     !PosLength            -- `>'
+            | TokHighEq   !PosLength            -- `>='
+            | TokEqual    !PosLength            -- `=='
+            | TokUnequal  !PosLength            -- `!='
+            | TokHat      !PosLength            -- `^'
+            | TokBar      !PosLength            -- `|'
+            | TokAnd      !PosLength            -- `&&'
+            | TokOr       !PosLength            -- `||'
+            | TokQuest    !PosLength            -- `?'
+            | TokColon    !PosLength            -- `:'
+            | TokAssign   !PosLength            -- `='
+            | TokPlusAss  !PosLength            -- `+='
+            | TokMinusAss !PosLength            -- `-='
+            | TokStarAss  !PosLength            -- `*='
+            | TokSlashAss !PosLength            -- `/='
+            | TokPercAss  !PosLength            -- `%='
+            | TokAmpAss   !PosLength            -- `&='
+            | TokHatAss   !PosLength            -- `^='
+            | TokBarAss   !PosLength            -- `|='
+            | TokSLAss    !PosLength            -- `<<='
+            | TokSRAss    !PosLength            -- `>>='
+            | TokComma    !PosLength            -- `,'
+            | TokSemic    !PosLength            -- `;'
+            | TokLBrace   !PosLength            -- `{'
+            | TokRBrace   !PosLength            -- `}'
+            | TokEllipsis !PosLength            -- `...'
+            | TokAlignof  !PosLength            -- `alignof'
                                                 -- (or `__alignof',
                                                 -- `__alignof__')
-            | CTokAsm      !PosLength            -- `asm'
+            | TokAsm      !PosLength            -- `asm'
                                                 -- (or `__asm',
                                                 -- `__asm__')
-            | CTokAuto     !PosLength            -- `auto'
-            | CTokBreak    !PosLength            -- `break'
-            | CTokBool     !PosLength            -- `_Bool'
-            | CTokCase     !PosLength            -- `case'
-            | CTokChar     !PosLength            -- `char'
-            | CTokConst    !PosLength            -- `const'
+            | TokAuto     !PosLength            -- `auto'
+            | TokBreak    !PosLength            -- `break'
+            | TokBool     !PosLength            -- `_Bool'
+            | TokCase     !PosLength            -- `case'
+            | TokChar     !PosLength            -- `char'
+            | TokConst    !PosLength            -- `const'
                                                 -- (or `__const', `__const__')
-            | CTokContinue !PosLength            -- `continue'
-            | CTokComplex  !PosLength            -- `_Complex'
-            | CTokDefault  !PosLength            -- `default'
-            | CTokDo       !PosLength            -- `do'
-            | CTokDouble   !PosLength            -- `double'
-            | CTokElse     !PosLength            -- `else'
-            | CTokEnum     !PosLength            -- `enum'
-            | CTokExtern   !PosLength            -- `extern'
-            | CTokFloat    !PosLength            -- `float'
-            | CTokFor      !PosLength            -- `for'
-            | CTokGoto     !PosLength            -- `goto'
-            | CTokIf       !PosLength            -- `if'
-            | CTokInline   !PosLength            -- `inline'
+            | TokContinue !PosLength            -- `continue'
+            | TokComplex  !PosLength            -- `_Complex'
+            | TokDefault  !PosLength            -- `default'
+            | TokDo       !PosLength            -- `do'
+            | TokDouble   !PosLength            -- `double'
+            | TokElse     !PosLength            -- `else'
+            | TokEnum     !PosLength            -- `enum'
+            | TokExtern   !PosLength            -- `extern'
+            | TokFloat    !PosLength            -- `float'
+            | TokFor      !PosLength            -- `for'
+            | TokGoto     !PosLength            -- `goto'
+            | TokIf       !PosLength            -- `if'
+            | TokInline   !PosLength            -- `inline'
                                                 -- (or `__inline',
                                                 -- `__inline__')
-            | CTokInt      !PosLength            -- `int'
-            | CTokLong     !PosLength            -- `long'
-            | CTokLabel    !PosLength            -- `__label__'
-            | CTokRegister !PosLength            -- `register'
-            | CTokRestrict !PosLength            -- `restrict'
+            | TokInt      !PosLength            -- `int'
+            | TokLong     !PosLength            -- `long'
+            | TokLabel    !PosLength            -- `__label__'
+            | TokRegister !PosLength            -- `register'
+            | TokRestrict !PosLength            -- `restrict'
                                                 -- (or `__restrict',
                                                 -- `__restrict__')
-            | CTokReturn   !PosLength            -- `return'
-            | CTokShort    !PosLength            -- `short'
-            | CTokSigned   !PosLength            -- `signed'
+            | TokReturn   !PosLength            -- `return'
+            | TokShort    !PosLength            -- `short'
+            | TokSigned   !PosLength            -- `signed'
                                                 -- (or `__signed',
                                                 -- `__signed__')
-            | CTokSizeof   !PosLength            -- `sizeof'
-            | CTokStatic   !PosLength            -- `static'
-            | CTokStruct   !PosLength            -- `struct'
-            | CTokSwitch   !PosLength            -- `switch'
-            | CTokTypedef  !PosLength            -- `typedef'
-            | CTokTypeof   !PosLength            -- `typeof'
-            | CTokThread   !PosLength            -- `__thread'
-            | CTokUnion    !PosLength            -- `union'
-            | CTokUnsigned !PosLength            -- `unsigned'
-            | CTokVoid     !PosLength            -- `void'
-            | CTokVolatile !PosLength            -- `volatile'
+            | TokSizeof   !PosLength            -- `sizeof'
+            | TokStatic   !PosLength            -- `static'
+            | TokStruct   !PosLength            -- `struct'
+            | TokSwitch   !PosLength            -- `switch'
+            | TokTypedef  !PosLength            -- `typedef'
+            | TokTypeof   !PosLength            -- `typeof'
+            | TokThread   !PosLength            -- `__thread'
+            | TokUnion    !PosLength            -- `union'
+            | TokUnsigned !PosLength            -- `unsigned'
+            | TokVoid     !PosLength            -- `void'
+            | TokVolatile !PosLength            -- `volatile'
                                                 -- (or `__volatile',
                                                 -- `__volatile__')
-            | CTokWhile    !PosLength            -- `while'
-            | CTokCLit     !PosLength !CChar     -- character constant
-            | CTokILit     !PosLength !CInteger  -- integer constant
-            | CTokFLit     !PosLength CFloat     -- float constant
-            | CTokSLit     !PosLength CString    -- string constant
-            | CTokIdent    !PosLength !Ident     -- identifier
+            | TokWhile    !PosLength            -- `while'
+            | TokCLit     !PosLength !CChar     -- character constant
+            | TokILit     !PosLength !CInteger  -- integer constant
+            | TokFLit     !PosLength CFloat     -- float constant
+            | TokSLit     !PosLength CString    -- string constant
+            | TokIdent    !PosLength !Ident     -- identifier
 
               -- not generated here, but in `CParser.parseCHeader'
-            | CTokTyIdent  !PosLength !Ident     -- `typedef-name' identifier
-            | CTokGnuC !GnuCTok !PosLength       -- special GNU C tokens
-            | CTokEof                           -- end of file
+            | TokTyIdent  !PosLength !Ident     -- `typedef-name' identifier
+            | TokGnuC !GnuTok !PosLength       -- special GNU C tokens
+            | TokEof                           -- end of file
 
 -- special tokens used in GNU C extensions to ANSI C
 --
-data GnuCTok = GnuCAttrTok              -- `__attribute__'
+data GnuTok = GnuCAttrTok              -- `__attribute__'
              | GnuCExtTok               -- `__extension__'
              | GnuCVaArg                -- `__builtin_va_arg'
              | GnuCOffsetof             -- `__builtin_offsetof'
@@ -143,206 +143,206 @@ data GnuCTok = GnuCAttrTok              -- `__attribute__'
              | GnuCComplexReal          -- `__real__'
              | GnuCComplexImag          -- `__imag__'
 
-instance Pos CToken where
+instance Pos Token where
   posOf = fst . posLenOfTok
 
 -- token position and length
-posLenOfTok :: CToken -> (Position,Int)
-posLenOfTok (CTokLParen   pos  ) = pos
-posLenOfTok (CTokRParen   pos  ) = pos
-posLenOfTok (CTokLBracket pos  ) = pos
-posLenOfTok (CTokRBracket pos  ) = pos
-posLenOfTok (CTokArrow    pos  ) = pos
-posLenOfTok (CTokDot      pos  ) = pos
-posLenOfTok (CTokExclam   pos  ) = pos
-posLenOfTok (CTokTilde    pos  ) = pos
-posLenOfTok (CTokInc      pos  ) = pos
-posLenOfTok (CTokDec      pos  ) = pos
-posLenOfTok (CTokPlus     pos  ) = pos
-posLenOfTok (CTokMinus    pos  ) = pos
-posLenOfTok (CTokStar     pos  ) = pos
-posLenOfTok (CTokSlash    pos  ) = pos
-posLenOfTok (CTokPercent  pos  ) = pos
-posLenOfTok (CTokAmper    pos  ) = pos
-posLenOfTok (CTokShiftL   pos  ) = pos
-posLenOfTok (CTokShiftR   pos  ) = pos
-posLenOfTok (CTokLess     pos  ) = pos
-posLenOfTok (CTokLessEq   pos  ) = pos
-posLenOfTok (CTokHigh     pos  ) = pos
-posLenOfTok (CTokHighEq   pos  ) = pos
-posLenOfTok (CTokEqual    pos  ) = pos
-posLenOfTok (CTokUnequal  pos  ) = pos
-posLenOfTok (CTokHat      pos  ) = pos
-posLenOfTok (CTokBar      pos  ) = pos
-posLenOfTok (CTokAnd      pos  ) = pos
-posLenOfTok (CTokOr       pos  ) = pos
-posLenOfTok (CTokQuest    pos  ) = pos
-posLenOfTok (CTokColon    pos  ) = pos
-posLenOfTok (CTokAssign   pos  ) = pos
-posLenOfTok (CTokPlusAss  pos  ) = pos
-posLenOfTok (CTokMinusAss pos  ) = pos
-posLenOfTok (CTokStarAss  pos  ) = pos
-posLenOfTok (CTokSlashAss pos  ) = pos
-posLenOfTok (CTokPercAss  pos  ) = pos
-posLenOfTok (CTokAmpAss   pos  ) = pos
-posLenOfTok (CTokHatAss   pos  ) = pos
-posLenOfTok (CTokBarAss   pos  ) = pos
-posLenOfTok (CTokSLAss    pos  ) = pos
-posLenOfTok (CTokSRAss    pos  ) = pos
-posLenOfTok (CTokComma    pos  ) = pos
-posLenOfTok (CTokSemic    pos  ) = pos
-posLenOfTok (CTokLBrace   pos  ) = pos
-posLenOfTok (CTokRBrace   pos  ) = pos
-posLenOfTok (CTokEllipsis pos  ) = pos
-posLenOfTok (CTokAlignof  pos  ) = pos
-posLenOfTok (CTokAsm      pos  ) = pos
-posLenOfTok (CTokAuto     pos  ) = pos
-posLenOfTok (CTokBreak    pos  ) = pos
-posLenOfTok (CTokBool     pos  ) = pos
-posLenOfTok (CTokCase     pos  ) = pos
-posLenOfTok (CTokChar     pos  ) = pos
-posLenOfTok (CTokConst    pos  ) = pos
-posLenOfTok (CTokContinue pos  ) = pos
-posLenOfTok (CTokComplex  pos  ) = pos
-posLenOfTok (CTokDefault  pos  ) = pos
-posLenOfTok (CTokDo       pos  ) = pos
-posLenOfTok (CTokDouble   pos  ) = pos
-posLenOfTok (CTokElse     pos  ) = pos
-posLenOfTok (CTokEnum     pos  ) = pos
-posLenOfTok (CTokExtern   pos  ) = pos
-posLenOfTok (CTokFloat    pos  ) = pos
-posLenOfTok (CTokFor      pos  ) = pos
-posLenOfTok (CTokGoto     pos  ) = pos
-posLenOfTok (CTokInt      pos  ) = pos
-posLenOfTok (CTokInline   pos  ) = pos
-posLenOfTok (CTokIf       pos  ) = pos
-posLenOfTok (CTokLong     pos  ) = pos
-posLenOfTok (CTokLabel    pos  ) = pos
-posLenOfTok (CTokRegister pos  ) = pos
-posLenOfTok (CTokRestrict pos  ) = pos
-posLenOfTok (CTokReturn   pos  ) = pos
-posLenOfTok (CTokShort    pos  ) = pos
-posLenOfTok (CTokSigned   pos  ) = pos
-posLenOfTok (CTokSizeof   pos  ) = pos
-posLenOfTok (CTokStatic   pos  ) = pos
-posLenOfTok (CTokStruct   pos  ) = pos
-posLenOfTok (CTokSwitch   pos  ) = pos
-posLenOfTok (CTokTypedef  pos  ) = pos
-posLenOfTok (CTokTypeof   pos  ) = pos
-posLenOfTok (CTokThread   pos  ) = pos
-posLenOfTok (CTokUnion    pos  ) = pos
-posLenOfTok (CTokUnsigned pos  ) = pos
-posLenOfTok (CTokVoid     pos  ) = pos
-posLenOfTok (CTokVolatile pos  ) = pos
-posLenOfTok (CTokWhile    pos  ) = pos
-posLenOfTok (CTokCLit     pos _) = pos
-posLenOfTok (CTokILit     pos _) = pos
-posLenOfTok (CTokFLit     pos _) = pos
-posLenOfTok (CTokSLit     pos _) = pos
-posLenOfTok (CTokIdent    pos _) = pos
-posLenOfTok (CTokTyIdent  pos _) = pos
-posLenOfTok (CTokGnuC   _ pos  ) = pos
-posLenOfTok CTokEof = error "tokenPos: Eof"
+posLenOfTok :: Token -> (Position,Int)
+posLenOfTok (TokLParen   pos  ) = pos
+posLenOfTok (TokRParen   pos  ) = pos
+posLenOfTok (TokLBracket pos  ) = pos
+posLenOfTok (TokRBracket pos  ) = pos
+posLenOfTok (TokArrow    pos  ) = pos
+posLenOfTok (TokDot      pos  ) = pos
+posLenOfTok (TokExclam   pos  ) = pos
+posLenOfTok (TokTilde    pos  ) = pos
+posLenOfTok (TokInc      pos  ) = pos
+posLenOfTok (TokDec      pos  ) = pos
+posLenOfTok (TokPlus     pos  ) = pos
+posLenOfTok (TokMinus    pos  ) = pos
+posLenOfTok (TokStar     pos  ) = pos
+posLenOfTok (TokSlash    pos  ) = pos
+posLenOfTok (TokPercent  pos  ) = pos
+posLenOfTok (TokAmper    pos  ) = pos
+posLenOfTok (TokShiftL   pos  ) = pos
+posLenOfTok (TokShiftR   pos  ) = pos
+posLenOfTok (TokLess     pos  ) = pos
+posLenOfTok (TokLessEq   pos  ) = pos
+posLenOfTok (TokHigh     pos  ) = pos
+posLenOfTok (TokHighEq   pos  ) = pos
+posLenOfTok (TokEqual    pos  ) = pos
+posLenOfTok (TokUnequal  pos  ) = pos
+posLenOfTok (TokHat      pos  ) = pos
+posLenOfTok (TokBar      pos  ) = pos
+posLenOfTok (TokAnd      pos  ) = pos
+posLenOfTok (TokOr       pos  ) = pos
+posLenOfTok (TokQuest    pos  ) = pos
+posLenOfTok (TokColon    pos  ) = pos
+posLenOfTok (TokAssign   pos  ) = pos
+posLenOfTok (TokPlusAss  pos  ) = pos
+posLenOfTok (TokMinusAss pos  ) = pos
+posLenOfTok (TokStarAss  pos  ) = pos
+posLenOfTok (TokSlashAss pos  ) = pos
+posLenOfTok (TokPercAss  pos  ) = pos
+posLenOfTok (TokAmpAss   pos  ) = pos
+posLenOfTok (TokHatAss   pos  ) = pos
+posLenOfTok (TokBarAss   pos  ) = pos
+posLenOfTok (TokSLAss    pos  ) = pos
+posLenOfTok (TokSRAss    pos  ) = pos
+posLenOfTok (TokComma    pos  ) = pos
+posLenOfTok (TokSemic    pos  ) = pos
+posLenOfTok (TokLBrace   pos  ) = pos
+posLenOfTok (TokRBrace   pos  ) = pos
+posLenOfTok (TokEllipsis pos  ) = pos
+posLenOfTok (TokAlignof  pos  ) = pos
+posLenOfTok (TokAsm      pos  ) = pos
+posLenOfTok (TokAuto     pos  ) = pos
+posLenOfTok (TokBreak    pos  ) = pos
+posLenOfTok (TokBool     pos  ) = pos
+posLenOfTok (TokCase     pos  ) = pos
+posLenOfTok (TokChar     pos  ) = pos
+posLenOfTok (TokConst    pos  ) = pos
+posLenOfTok (TokContinue pos  ) = pos
+posLenOfTok (TokComplex  pos  ) = pos
+posLenOfTok (TokDefault  pos  ) = pos
+posLenOfTok (TokDo       pos  ) = pos
+posLenOfTok (TokDouble   pos  ) = pos
+posLenOfTok (TokElse     pos  ) = pos
+posLenOfTok (TokEnum     pos  ) = pos
+posLenOfTok (TokExtern   pos  ) = pos
+posLenOfTok (TokFloat    pos  ) = pos
+posLenOfTok (TokFor      pos  ) = pos
+posLenOfTok (TokGoto     pos  ) = pos
+posLenOfTok (TokInt      pos  ) = pos
+posLenOfTok (TokInline   pos  ) = pos
+posLenOfTok (TokIf       pos  ) = pos
+posLenOfTok (TokLong     pos  ) = pos
+posLenOfTok (TokLabel    pos  ) = pos
+posLenOfTok (TokRegister pos  ) = pos
+posLenOfTok (TokRestrict pos  ) = pos
+posLenOfTok (TokReturn   pos  ) = pos
+posLenOfTok (TokShort    pos  ) = pos
+posLenOfTok (TokSigned   pos  ) = pos
+posLenOfTok (TokSizeof   pos  ) = pos
+posLenOfTok (TokStatic   pos  ) = pos
+posLenOfTok (TokStruct   pos  ) = pos
+posLenOfTok (TokSwitch   pos  ) = pos
+posLenOfTok (TokTypedef  pos  ) = pos
+posLenOfTok (TokTypeof   pos  ) = pos
+posLenOfTok (TokThread   pos  ) = pos
+posLenOfTok (TokUnion    pos  ) = pos
+posLenOfTok (TokUnsigned pos  ) = pos
+posLenOfTok (TokVoid     pos  ) = pos
+posLenOfTok (TokVolatile pos  ) = pos
+posLenOfTok (TokWhile    pos  ) = pos
+posLenOfTok (TokCLit     pos _) = pos
+posLenOfTok (TokILit     pos _) = pos
+posLenOfTok (TokFLit     pos _) = pos
+posLenOfTok (TokSLit     pos _) = pos
+posLenOfTok (TokIdent    pos _) = pos
+posLenOfTok (TokTyIdent  pos _) = pos
+posLenOfTok (TokGnuC   _ pos  ) = pos
+posLenOfTok TokEof = error "tokenPos: Eof"
 
-instance Show CToken where
-  showsPrec _ (CTokLParen   _  ) = showString "("
-  showsPrec _ (CTokRParen   _  ) = showString ")"
-  showsPrec _ (CTokLBracket _  ) = showString "["
-  showsPrec _ (CTokRBracket _  ) = showString "]"
-  showsPrec _ (CTokArrow    _  ) = showString "->"
-  showsPrec _ (CTokDot      _  ) = showString "."
-  showsPrec _ (CTokExclam   _  ) = showString "!"
-  showsPrec _ (CTokTilde    _  ) = showString "~"
-  showsPrec _ (CTokInc      _  ) = showString "++"
-  showsPrec _ (CTokDec      _  ) = showString "--"
-  showsPrec _ (CTokPlus     _  ) = showString "+"
-  showsPrec _ (CTokMinus    _  ) = showString "-"
-  showsPrec _ (CTokStar     _  ) = showString "*"
-  showsPrec _ (CTokSlash    _  ) = showString "/"
-  showsPrec _ (CTokPercent  _  ) = showString "%"
-  showsPrec _ (CTokAmper    _  ) = showString "&"
-  showsPrec _ (CTokShiftL   _  ) = showString "<<"
-  showsPrec _ (CTokShiftR   _  ) = showString ">>"
-  showsPrec _ (CTokLess     _  ) = showString "<"
-  showsPrec _ (CTokLessEq   _  ) = showString "<="
-  showsPrec _ (CTokHigh     _  ) = showString ">"
-  showsPrec _ (CTokHighEq   _  ) = showString ">="
-  showsPrec _ (CTokEqual    _  ) = showString "=="
-  showsPrec _ (CTokUnequal  _  ) = showString "!="
-  showsPrec _ (CTokHat      _  ) = showString "^"
-  showsPrec _ (CTokBar      _  ) = showString "|"
-  showsPrec _ (CTokAnd      _  ) = showString "&&"
-  showsPrec _ (CTokOr       _  ) = showString "||"
-  showsPrec _ (CTokQuest    _  ) = showString "?"
-  showsPrec _ (CTokColon    _  ) = showString ":"
-  showsPrec _ (CTokAssign   _  ) = showString "="
-  showsPrec _ (CTokPlusAss  _  ) = showString "+="
-  showsPrec _ (CTokMinusAss _  ) = showString "-="
-  showsPrec _ (CTokStarAss  _  ) = showString "*="
-  showsPrec _ (CTokSlashAss _  ) = showString "/="
-  showsPrec _ (CTokPercAss  _  ) = showString "%="
-  showsPrec _ (CTokAmpAss   _  ) = showString "&="
-  showsPrec _ (CTokHatAss   _  ) = showString "^="
-  showsPrec _ (CTokBarAss   _  ) = showString "|="
-  showsPrec _ (CTokSLAss    _  ) = showString "<<="
-  showsPrec _ (CTokSRAss    _  ) = showString ">>="
-  showsPrec _ (CTokComma    _  ) = showString ","
-  showsPrec _ (CTokSemic    _  ) = showString ";"
-  showsPrec _ (CTokLBrace   _  ) = showString "{"
-  showsPrec _ (CTokRBrace   _  ) = showString "}"
-  showsPrec _ (CTokEllipsis _  ) = showString "..."
-  showsPrec _ (CTokAlignof  _  ) = showString "alignof"
-  showsPrec _ (CTokAsm      _  ) = showString "asm"
-  showsPrec _ (CTokAuto     _  ) = showString "auto"
-  showsPrec _ (CTokBool _)       = showString "_Bool"
-  showsPrec _ (CTokBreak    _  ) = showString "break"
-  showsPrec _ (CTokCase     _  ) = showString "case"
-  showsPrec _ (CTokChar     _  ) = showString "char"
-  showsPrec _ (CTokComplex _)    = showString "_Complex"
-  showsPrec _ (CTokConst    _  ) = showString "const"
-  showsPrec _ (CTokContinue _  ) = showString "continue"
-  showsPrec _ (CTokDefault  _  ) = showString "default"
-  showsPrec _ (CTokDouble   _  ) = showString "double"
-  showsPrec _ (CTokDo       _  ) = showString "do"
-  showsPrec _ (CTokElse     _  ) = showString "else"
-  showsPrec _ (CTokEnum     _  ) = showString "enum"
-  showsPrec _ (CTokExtern   _  ) = showString "extern"
-  showsPrec _ (CTokFloat    _  ) = showString "float"
-  showsPrec _ (CTokFor      _  ) = showString "for"
-  showsPrec _ (CTokGoto     _  ) = showString "goto"
-  showsPrec _ (CTokIf       _  ) = showString "if"
-  showsPrec _ (CTokInline   _  ) = showString "inline"
-  showsPrec _ (CTokInt      _  ) = showString "int"
-  showsPrec _ (CTokLong     _  ) = showString "long"
-  showsPrec _ (CTokLabel    _  ) = showString "__label__"
-  showsPrec _ (CTokRegister _  ) = showString "register"
-  showsPrec _ (CTokRestrict _  ) = showString "restrict"
-  showsPrec _ (CTokReturn   _  ) = showString "return"
-  showsPrec _ (CTokShort    _  ) = showString "short"
-  showsPrec _ (CTokSigned   _  ) = showString "signed"
-  showsPrec _ (CTokSizeof   _  ) = showString "sizeof"
-  showsPrec _ (CTokStatic   _  ) = showString "static"
-  showsPrec _ (CTokStruct   _  ) = showString "struct"
-  showsPrec _ (CTokSwitch   _  ) = showString "switch"
-  showsPrec _ (CTokTypedef  _  ) = showString "typedef"
-  showsPrec _ (CTokTypeof   _  ) = showString "typeof"
-  showsPrec _ (CTokThread   _  ) = showString "__thread"
-  showsPrec _ (CTokUnion    _  ) = showString "union"
-  showsPrec _ (CTokUnsigned _  ) = showString "unsigned"
-  showsPrec _ (CTokVoid     _  ) = showString "void"
-  showsPrec _ (CTokVolatile _  ) = showString "volatile"
-  showsPrec _ (CTokWhile    _  ) = showString "while"
-  showsPrec _ (CTokCLit     _ c) = shows c
-  showsPrec _ (CTokILit     _ i) = shows i
-  showsPrec _ (CTokFLit     _ f) = shows f
-  showsPrec _ (CTokSLit     _ s) = shows s
-  showsPrec _ (CTokIdent    _ i) = (showString . identToString) i
-  showsPrec _ (CTokTyIdent  _ i) = (showString . identToString) i
-  showsPrec _ (CTokGnuC GnuCAttrTok _) = showString "__attribute__"
-  showsPrec _ (CTokGnuC GnuCExtTok  _) = showString "__extension__"
-  showsPrec _ (CTokGnuC GnuCComplexReal _) = showString "__real__"
-  showsPrec _ (CTokGnuC GnuCComplexImag  _) = showString "__imag__"
-  showsPrec _ (CTokGnuC GnuCVaArg    _) = showString "__builtin_va_arg"
-  showsPrec _ (CTokGnuC GnuCOffsetof _) = showString "__builtin_offsetof"
-  showsPrec _ (CTokGnuC GnuCTyCompat _) = showString "__builtin_types_compatible_p"
-  showsPrec _ CTokEof = error "show CToken : CTokEof"
+instance Show Token where
+  showsPrec _ (TokLParen   _  ) = showString "("
+  showsPrec _ (TokRParen   _  ) = showString ")"
+  showsPrec _ (TokLBracket _  ) = showString "["
+  showsPrec _ (TokRBracket _  ) = showString "]"
+  showsPrec _ (TokArrow    _  ) = showString "->"
+  showsPrec _ (TokDot      _  ) = showString "."
+  showsPrec _ (TokExclam   _  ) = showString "!"
+  showsPrec _ (TokTilde    _  ) = showString "~"
+  showsPrec _ (TokInc      _  ) = showString "++"
+  showsPrec _ (TokDec      _  ) = showString "--"
+  showsPrec _ (TokPlus     _  ) = showString "+"
+  showsPrec _ (TokMinus    _  ) = showString "-"
+  showsPrec _ (TokStar     _  ) = showString "*"
+  showsPrec _ (TokSlash    _  ) = showString "/"
+  showsPrec _ (TokPercent  _  ) = showString "%"
+  showsPrec _ (TokAmper    _  ) = showString "&"
+  showsPrec _ (TokShiftL   _  ) = showString "<<"
+  showsPrec _ (TokShiftR   _  ) = showString ">>"
+  showsPrec _ (TokLess     _  ) = showString "<"
+  showsPrec _ (TokLessEq   _  ) = showString "<="
+  showsPrec _ (TokHigh     _  ) = showString ">"
+  showsPrec _ (TokHighEq   _  ) = showString ">="
+  showsPrec _ (TokEqual    _  ) = showString "=="
+  showsPrec _ (TokUnequal  _  ) = showString "!="
+  showsPrec _ (TokHat      _  ) = showString "^"
+  showsPrec _ (TokBar      _  ) = showString "|"
+  showsPrec _ (TokAnd      _  ) = showString "&&"
+  showsPrec _ (TokOr       _  ) = showString "||"
+  showsPrec _ (TokQuest    _  ) = showString "?"
+  showsPrec _ (TokColon    _  ) = showString ":"
+  showsPrec _ (TokAssign   _  ) = showString "="
+  showsPrec _ (TokPlusAss  _  ) = showString "+="
+  showsPrec _ (TokMinusAss _  ) = showString "-="
+  showsPrec _ (TokStarAss  _  ) = showString "*="
+  showsPrec _ (TokSlashAss _  ) = showString "/="
+  showsPrec _ (TokPercAss  _  ) = showString "%="
+  showsPrec _ (TokAmpAss   _  ) = showString "&="
+  showsPrec _ (TokHatAss   _  ) = showString "^="
+  showsPrec _ (TokBarAss   _  ) = showString "|="
+  showsPrec _ (TokSLAss    _  ) = showString "<<="
+  showsPrec _ (TokSRAss    _  ) = showString ">>="
+  showsPrec _ (TokComma    _  ) = showString ","
+  showsPrec _ (TokSemic    _  ) = showString ";"
+  showsPrec _ (TokLBrace   _  ) = showString "{"
+  showsPrec _ (TokRBrace   _  ) = showString "}"
+  showsPrec _ (TokEllipsis _  ) = showString "..."
+  showsPrec _ (TokAlignof  _  ) = showString "alignof"
+  showsPrec _ (TokAsm      _  ) = showString "asm"
+  showsPrec _ (TokAuto     _  ) = showString "auto"
+  showsPrec _ (TokBool _)       = showString "_Bool"
+  showsPrec _ (TokBreak    _  ) = showString "break"
+  showsPrec _ (TokCase     _  ) = showString "case"
+  showsPrec _ (TokChar     _  ) = showString "char"
+  showsPrec _ (TokComplex _)    = showString "_Complex"
+  showsPrec _ (TokConst    _  ) = showString "const"
+  showsPrec _ (TokContinue _  ) = showString "continue"
+  showsPrec _ (TokDefault  _  ) = showString "default"
+  showsPrec _ (TokDouble   _  ) = showString "double"
+  showsPrec _ (TokDo       _  ) = showString "do"
+  showsPrec _ (TokElse     _  ) = showString "else"
+  showsPrec _ (TokEnum     _  ) = showString "enum"
+  showsPrec _ (TokExtern   _  ) = showString "extern"
+  showsPrec _ (TokFloat    _  ) = showString "float"
+  showsPrec _ (TokFor      _  ) = showString "for"
+  showsPrec _ (TokGoto     _  ) = showString "goto"
+  showsPrec _ (TokIf       _  ) = showString "if"
+  showsPrec _ (TokInline   _  ) = showString "inline"
+  showsPrec _ (TokInt      _  ) = showString "int"
+  showsPrec _ (TokLong     _  ) = showString "long"
+  showsPrec _ (TokLabel    _  ) = showString "__label__"
+  showsPrec _ (TokRegister _  ) = showString "register"
+  showsPrec _ (TokRestrict _  ) = showString "restrict"
+  showsPrec _ (TokReturn   _  ) = showString "return"
+  showsPrec _ (TokShort    _  ) = showString "short"
+  showsPrec _ (TokSigned   _  ) = showString "signed"
+  showsPrec _ (TokSizeof   _  ) = showString "sizeof"
+  showsPrec _ (TokStatic   _  ) = showString "static"
+  showsPrec _ (TokStruct   _  ) = showString "struct"
+  showsPrec _ (TokSwitch   _  ) = showString "switch"
+  showsPrec _ (TokTypedef  _  ) = showString "typedef"
+  showsPrec _ (TokTypeof   _  ) = showString "typeof"
+  showsPrec _ (TokThread   _  ) = showString "__thread"
+  showsPrec _ (TokUnion    _  ) = showString "union"
+  showsPrec _ (TokUnsigned _  ) = showString "unsigned"
+  showsPrec _ (TokVoid     _  ) = showString "void"
+  showsPrec _ (TokVolatile _  ) = showString "volatile"
+  showsPrec _ (TokWhile    _  ) = showString "while"
+  showsPrec _ (TokCLit     _ c) = shows c
+  showsPrec _ (TokILit     _ i) = shows i
+  showsPrec _ (TokFLit     _ f) = shows f
+  showsPrec _ (TokSLit     _ s) = shows s
+  showsPrec _ (TokIdent    _ i) = (showString . identToString) i
+  showsPrec _ (TokTyIdent  _ i) = (showString . identToString) i
+  showsPrec _ (TokGnuC GnuCAttrTok _) = showString "__attribute__"
+  showsPrec _ (TokGnuC GnuCExtTok  _) = showString "__extension__"
+  showsPrec _ (TokGnuC GnuCComplexReal _) = showString "__real__"
+  showsPrec _ (TokGnuC GnuCComplexImag  _) = showString "__imag__"
+  showsPrec _ (TokGnuC GnuCVaArg    _) = showString "__builtin_va_arg"
+  showsPrec _ (TokGnuC GnuCOffsetof _) = showString "__builtin_offsetof"
+  showsPrec _ (TokGnuC GnuCTyCompat _) = showString "__builtin_types_compatible_p"
+  showsPrec _ TokEof = error "show Token : TokEof"

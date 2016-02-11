@@ -32,9 +32,9 @@ module Language.CFamily.C.ParserMonad (
   getPos,            -- :: P Position
   getInput,          -- :: P String
   setInput,          -- :: String -> P ()
-  getLastToken,      -- :: P CToken
-  getSavedToken,     -- :: P CToken
-  setLastToken,      -- :: CToken -> P ()
+  getLastToken,      -- :: P Token
+  getSavedToken,     -- :: P Token
+  setLastToken,      -- :: Token -> P ()
   handleEofToken,    -- :: P ()
   getCurrentPosition,-- :: P Position
   ParseError(..),
@@ -44,7 +44,7 @@ import Language.CFamily.Data.Position  (Position(..))
 import Language.CFamily.Data.InputStream
 import Language.CFamily.Data.Name    (Name)
 import Language.CFamily.Data.Ident    (Ident)
-import Language.CFamily.C.Token (CToken(CTokEof))
+import Language.CFamily.C.Token (Token(TokEof))
 
 import Control.Monad (liftM, ap)
 import Data.Set  (Set)
@@ -62,8 +62,8 @@ data ParseResult a
 data PState = PState {
         curPos     :: !Position,        -- position at current input location
         curInput   :: !InputStream,      -- the current input
-        prevToken  ::  CToken,          -- the previous token
-        savedToken ::  CToken,          -- and the token before that
+        prevToken  ::  Token,          -- the previous token
+        savedToken ::  Token,          -- and the token before that
         namesupply :: ![Name],          -- the name unique supply
         tyidents   :: !(Set Ident),     -- the set of typedef'ed identifiers
         scopes     :: ![Set Ident]      -- the tyident sets for outer scopes
@@ -161,15 +161,15 @@ getInput = P $ \s@PState{curInput=i} -> POk s i
 setInput :: InputStream -> P ()
 setInput i = P $ \s -> POk s{curInput=i} ()
 
-getLastToken :: P CToken
+getLastToken :: P Token
 getLastToken = P $ \s@PState{prevToken=tok} -> POk s tok
 
-getSavedToken :: P CToken
+getSavedToken :: P Token
 getSavedToken = P $ \s@PState{savedToken=tok} -> POk s tok
 
 -- | @setLastToken modifyCache tok@
-setLastToken :: CToken -> P ()
-setLastToken CTokEof = P $ \s -> POk s{savedToken=(prevToken s)} ()
+setLastToken :: Token -> P ()
+setLastToken TokEof = P $ \s -> POk s{savedToken=(prevToken s)} ()
 setLastToken tok      = P $ \s -> POk s{prevToken=tok,savedToken=(prevToken s)} ()
 
 -- | handle an End-Of-File token (changes savedToken)

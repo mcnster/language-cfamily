@@ -105,7 +105,7 @@ module Language.CFamily.C.Parser (
 import Language.CFamily.C.Builtin   (builtinTypeNames)
 import Language.CFamily.C.Constants
 import Language.CFamily.C.Lexer     (lexC, parseError)
-import Language.CFamily.C.Token    (CToken(..), GnuCTok(..), posLenOfTok)
+import Language.CFamily.C.Token    (Token(..), GnuTok(..), posLenOfTok)
 import Language.CFamily.C.ParserMonad (P, failP, execParser, getNewName, addTypedef, shadowTypedef, getCurrentPosition,
                                       enterScope, leaveScope, getLastToken, getSavedToken, ParseError(..))
 import Language.CFamily.C.Syntax.AST
@@ -127,116 +127,116 @@ import Control.Monad (mplus)
 %name statement statement
 %name expression expression
 
-%tokentype { CToken }
+%tokentype { Token }
 
 %monad { P } { >>= } { return }
-%lexer { lexC } { CTokEof }
+%lexer { lexC } { TokEof }
 
 %expect 1
 
 %token
 
-'('		{ CTokLParen	_ }
-')'		{ CTokRParen	_ }
-'['		{ CTokLBracket	_ }
-']'		{ CTokRBracket	_ }
-"->"		{ CTokArrow	_ }
-'.'		{ CTokDot	_ }
-'!'		{ CTokExclam	_ }
-'~'		{ CTokTilde	_ }
-"++"		{ CTokInc	_ }
-"--"		{ CTokDec	_ }
-'+'		{ CTokPlus	_ }
-'-'		{ CTokMinus	_ }
-'*'		{ CTokStar	_ }
-'/'		{ CTokSlash	_ }
-'%'		{ CTokPercent	_ }
-'&'		{ CTokAmper	_ }
-"<<"		{ CTokShiftL	_ }
-">>"		{ CTokShiftR	_ }
-'<'		{ CTokLess	_ }
-"<="		{ CTokLessEq	_ }
-'>'		{ CTokHigh	_ }
-">="		{ CTokHighEq	_ }
-"=="		{ CTokEqual	_ }
-"!="		{ CTokUnequal	_ }
-'^'		{ CTokHat	_ }
-'|'		{ CTokBar	_ }
-"&&"		{ CTokAnd	_ }
-"||"		{ CTokOr	_ }
-'?'		{ CTokQuest	_ }
-':'		{ CTokColon	_ }
-'='		{ CTokAssign	_ }
-"+="		{ CTokPlusAss	_ }
-"-="		{ CTokMinusAss	_ }
-"*="		{ CTokStarAss	_ }
-"/="		{ CTokSlashAss	_ }
-"%="		{ CTokPercAss	_ }
-"&="		{ CTokAmpAss	_ }
-"^="		{ CTokHatAss	_ }
-"|="		{ CTokBarAss	_ }
-"<<="		{ CTokSLAss	_ }
-">>="		{ CTokSRAss	_ }
-','		{ CTokComma	_ }
-';'		{ CTokSemic	_ }
-'{'		{ CTokLBrace	_ }
-'}'		{ CTokRBrace	_ }
-"..."		{ CTokEllipsis	_ }
-alignof		{ CTokAlignof	_ }
-asm		{ CTokAsm	_ }
-auto		{ CTokAuto	_ }
-break		{ CTokBreak	_ }
-"_Bool"		{ CTokBool	_ }
-case		{ CTokCase	_ }
-char		{ CTokChar	_ }
-const		{ CTokConst	_ }
-continue	{ CTokContinue	_ }
-"_Complex"	{ CTokComplex	_ }
-default		{ CTokDefault	_ }
-do		{ CTokDo	_ }
-double		{ CTokDouble	_ }
-else		{ CTokElse	_ }
-enum		{ CTokEnum	_ }
-extern		{ CTokExtern	_ }
-float		{ CTokFloat	_ }
-for		{ CTokFor	_ }
-goto		{ CTokGoto	_ }
-if		{ CTokIf	_ }
-inline		{ CTokInline	_ }
-int		{ CTokInt	_ }
-long		{ CTokLong	_ }
-"__label__"	{ CTokLabel	_ }
-register	{ CTokRegister	_ }
-restrict	{ CTokRestrict	_ }
-return		{ CTokReturn	_ }
-short		{ CTokShort	_ }
-signed		{ CTokSigned	_ }
-sizeof		{ CTokSizeof	_ }
-static		{ CTokStatic	_ }
-struct		{ CTokStruct	_ }
-switch		{ CTokSwitch	_ }
-typedef		{ CTokTypedef	_ }
-typeof		{ CTokTypeof	_ }
-"__thread"	{ CTokThread	_ }
-union		{ CTokUnion	_ }
-unsigned	{ CTokUnsigned	_ }
-void		{ CTokVoid	_ }
-volatile	{ CTokVolatile	_ }
-while		{ CTokWhile	_ }
-cchar		{ CTokCLit   _ _ }		-- character constant
-cint		{ CTokILit   _ _ }		-- integer constant
-cfloat		{ CTokFLit   _ _ }		-- float constant
-cstr		{ CTokSLit   _ _ }		-- string constant (no escapes)
-ident		{ CTokIdent  _ $$ }		-- identifier
-tyident		{ CTokTyIdent _ $$ }		-- `typedef-name' identifier
-"__attribute__"	{ CTokGnuC GnuCAttrTok _ }	-- special GNU C tokens
-"__extension__"	{ CTokGnuC GnuCExtTok  _ }	-- special GNU C tokens
-"__real__"        { CTokGnuC GnuCComplexReal _ }
-"__imag__"        { CTokGnuC GnuCComplexImag _ }
+'('		{ TokLParen	_ }
+')'		{ TokRParen	_ }
+'['		{ TokLBracket	_ }
+']'		{ TokRBracket	_ }
+"->"		{ TokArrow	_ }
+'.'		{ TokDot	_ }
+'!'		{ TokExclam	_ }
+'~'		{ TokTilde	_ }
+"++"		{ TokInc	_ }
+"--"		{ TokDec	_ }
+'+'		{ TokPlus	_ }
+'-'		{ TokMinus	_ }
+'*'		{ TokStar	_ }
+'/'		{ TokSlash	_ }
+'%'		{ TokPercent	_ }
+'&'		{ TokAmper	_ }
+"<<"		{ TokShiftL	_ }
+">>"		{ TokShiftR	_ }
+'<'		{ TokLess	_ }
+"<="		{ TokLessEq	_ }
+'>'		{ TokHigh	_ }
+">="		{ TokHighEq	_ }
+"=="		{ TokEqual	_ }
+"!="		{ TokUnequal	_ }
+'^'		{ TokHat	_ }
+'|'		{ TokBar	_ }
+"&&"		{ TokAnd	_ }
+"||"		{ TokOr	_ }
+'?'		{ TokQuest	_ }
+':'		{ TokColon	_ }
+'='		{ TokAssign	_ }
+"+="		{ TokPlusAss	_ }
+"-="		{ TokMinusAss	_ }
+"*="		{ TokStarAss	_ }
+"/="		{ TokSlashAss	_ }
+"%="		{ TokPercAss	_ }
+"&="		{ TokAmpAss	_ }
+"^="		{ TokHatAss	_ }
+"|="		{ TokBarAss	_ }
+"<<="		{ TokSLAss	_ }
+">>="		{ TokSRAss	_ }
+','		{ TokComma	_ }
+';'		{ TokSemic	_ }
+'{'		{ TokLBrace	_ }
+'}'		{ TokRBrace	_ }
+"..."		{ TokEllipsis	_ }
+alignof		{ TokAlignof	_ }
+asm		{ TokAsm	_ }
+auto		{ TokAuto	_ }
+break		{ TokBreak	_ }
+"_Bool"		{ TokBool	_ }
+case		{ TokCase	_ }
+char		{ TokChar	_ }
+const		{ TokConst	_ }
+continue	{ TokContinue	_ }
+"_Complex"	{ TokComplex	_ }
+default		{ TokDefault	_ }
+do		{ TokDo	_ }
+double		{ TokDouble	_ }
+else		{ TokElse	_ }
+enum		{ TokEnum	_ }
+extern		{ TokExtern	_ }
+float		{ TokFloat	_ }
+for		{ TokFor	_ }
+goto		{ TokGoto	_ }
+if		{ TokIf	_ }
+inline		{ TokInline	_ }
+int		{ TokInt	_ }
+long		{ TokLong	_ }
+"__label__"	{ TokLabel	_ }
+register	{ TokRegister	_ }
+restrict	{ TokRestrict	_ }
+return		{ TokReturn	_ }
+short		{ TokShort	_ }
+signed		{ TokSigned	_ }
+sizeof		{ TokSizeof	_ }
+static		{ TokStatic	_ }
+struct		{ TokStruct	_ }
+switch		{ TokSwitch	_ }
+typedef		{ TokTypedef	_ }
+typeof		{ TokTypeof	_ }
+"__thread"	{ TokThread	_ }
+union		{ TokUnion	_ }
+unsigned	{ TokUnsigned	_ }
+void		{ TokVoid	_ }
+volatile	{ TokVolatile	_ }
+while		{ TokWhile	_ }
+cchar		{ TokCLit   _ _ }		-- character constant
+cint		{ TokILit   _ _ }		-- integer constant
+cfloat		{ TokFLit   _ _ }		-- float constant
+cstr		{ TokSLit   _ _ }		-- string constant (no escapes)
+ident		{ TokIdent  _ $$ }		-- identifier
+tyident		{ TokTyIdent _ $$ }		-- `typedef-name' identifier
+"__attribute__"	{ TokGnuC GnuCAttrTok _ }	-- special GNU C tokens
+"__extension__"	{ TokGnuC GnuCExtTok  _ }	-- special GNU C tokens
+"__real__"        { TokGnuC GnuCComplexReal _ }
+"__imag__"        { TokGnuC GnuCComplexImag _ }
 -- special GNU C builtin 'functions' that actually take types as parameters:
-"__builtin_va_arg"		{ CTokGnuC GnuCVaArg    _ }
-"__builtin_offsetof"		{ CTokGnuC GnuCOffsetof _ }
-"__builtin_types_compatible_p"	{ CTokGnuC GnuCTyCompat _ }
+"__builtin_va_arg"		{ TokGnuC GnuCVaArg    _ }
+"__builtin_offsetof"		{ TokGnuC GnuCOffsetof _ }
+"__builtin_types_compatible_p"	{ TokGnuC GnuCTyCompat _ }
 
 %%
 
@@ -2008,24 +2008,24 @@ constant_expression
 --
 constant :: { CConst }
 constant
-  : cint	  {% withNodeInfo $1 $ case $1 of CTokILit _ i -> CIntConst i }
-  | cchar	  {% withNodeInfo $1 $ case $1 of CTokCLit _ c -> CCharConst c }
-  | cfloat	{% withNodeInfo $1 $ case $1 of CTokFLit _ f -> CFloatConst f }
+  : cint	  {% withNodeInfo $1 $ case $1 of TokILit _ i -> CIntConst i }
+  | cchar	  {% withNodeInfo $1 $ case $1 of TokCLit _ c -> CCharConst c }
+  | cfloat	{% withNodeInfo $1 $ case $1 of TokFLit _ f -> CFloatConst f }
 
 
 string_literal :: { CStrLit }
 string_literal
   : cstr
-  	{% withNodeInfo $1 $ case $1 of CTokSLit _ s -> CStrLit s }
+  	{% withNodeInfo $1 $ case $1 of TokSLit _ s -> CStrLit s }
 
   | cstr string_literal_list
-  	{% withNodeInfo $1 $ case $1 of CTokSLit _ s -> CStrLit (concatCStrings (s : reverse $2)) }
+  	{% withNodeInfo $1 $ case $1 of TokSLit _ s -> CStrLit (concatCStrings (s : reverse $2)) }
 
 
 string_literal_list :: { Reversed [CString] }
 string_literal_list
-  : cstr			{ case $1 of CTokSLit _ s -> singleton s }
-  | string_literal_list cstr	{ case $2 of CTokSLit _ s -> $1 `snoc` s }
+  : cstr			{ case $1 of TokSLit _ s -> singleton s }
+  | string_literal_list cstr	{ case $2 of TokSLit _ s -> $1 `snoc` s }
 
 
 identifier :: { Ident }

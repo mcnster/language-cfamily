@@ -152,7 +152,7 @@ data Token = TokParenL              !PosLength            -- `('
            | TokLitUserDef          !PosLength  LitUserDef
            | TokIdent               !PosLength  !Ident      -- identifier
            | TokTyIdent             !PosLength  !Ident      -- `typedef-name' identifier
-           | TokGnuC                !PosLength
+           | TokGnuC     !GnuTok    !PosLength              -- special GNU tokens
            | TokEof                                         -- end of file
      deriving (Show)
 
