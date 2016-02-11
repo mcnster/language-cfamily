@@ -1,6 +1,6 @@
 -- ----------------------------------------------------------------------------
 -- 
--- Module      : Language.CFamily.C.Constants
+-- Module      : Language.CFamily.Constants
 -- Copyright   : (c) 2007..2008 Duncan Coutts, Benedikt Huber
 --               (c) 2016 Mick Nelso
 -- License     : BSD3
@@ -10,15 +10,18 @@
 --
 -- This module provides support for representing, checking and exporting c
 -- constants, i.e. integral, float, character and string constants.
+--
 -- ----------------------------------------------------------------------------
 
-module Language.CFamily.CXX.Constants where
+module Language.CFamily.Constants where
 
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Name
 import Language.CFamily.Data.Position
 
+import Data.Bits
 import Data.Char
+import Data.Generics hiding (mkIntType)
 import Data.List
 import Data.Maybe
 
@@ -31,18 +34,18 @@ data LitInteger = LitInteger {
                         , litIntRadix  :: !Int
                         , litIntType   :: !LitIntType
                   }
-     deriving (Show)
+     deriving (Data, Eq, Show)
 
 data LitIntType = LitIntType {
                           litIntTypeUnsigned :: !Bool
                         , litIntTypeLong     :: !LitIntLongType
                   }
-     deriving (Show)
+     deriving (Data, Eq, Show)
 
 data LitIntLongType = LitIntNotLong
                     | LitIntLong
                     | LitIntLongLong
-     deriving (Show)
+     deriving (Data, Eq, Show)
 
 readLitInteger
    :: Bool
@@ -105,20 +108,20 @@ mkIntType = LitIntType
 -- ----------------------------------------------------------------------------
 
 data LitChar = LitChar {
-                    v            :: !Char
-                  , litCharType  :: !LitCharType
+                    litCharValue    :: !Char
+                  , litCharType     :: !LitCharType
                }
              | LitChars {
-                    vs           :: ![Char]
-                  , litCharType  :: !LitCharType
+                    litCharValues   :: ![Char]
+                  , litCharType     :: !LitCharType
                }
-     deriving (Show)
+     deriving (Data, Show)
 
 data LitCharType = LitCharOrdinary
                  | LitCharWide
                  | LitChar16T
                  | LitChar32T
-     deriving (Show)
+     deriving (Data, Show)
 
 readLitChar
    :: Bool
@@ -224,12 +227,12 @@ data LitFloat = LitFloat {
                        litFloatValue   :: Double
                      , litFloatType    :: LitFloatType
                }
-     deriving (Show)
+     deriving (Data, Show)
 
 data LitFloatType = LitFloatFloat
                   | LitFloatDouble
                   | LitFloatLongDouble
-     deriving (Show)
+     deriving (Data, Show)
 
 
 readLitFloat
@@ -282,14 +285,14 @@ data LitString = LitString {
                      , litStringType      :: LitStringType
                      , litStringRaw       :: Bool
                  }
-     deriving (Show)
+     deriving (Data, Eq, Show)
 
 data LitStringType = LitStringOrdinary
                    | LitStringUtf8
                    | LitStringChar16T
                    | LitStringChar32T
                    | LitStringWide
-     deriving (Show)
+     deriving (Data, Eq, Show)
 
 readLitString
    :: Bool
@@ -402,42 +405,62 @@ _showWideFlag flag = if flag then showString "L" else id
 getCChar :: CChar -> [Char]
 getCChar (CChar  c _)   = [c]
 getCChar (CChars  cs _) = cs
+-}
 
 -- | get integer value of a C char constant
 -- undefined result for multi-char char constants
-getCCharAsInt :: CChar -> Integer
-getCCharAsInt (CChar c _) = fromIntegral (fromEnum c)
-getCCharAsInt (CChars _cs _) = error "integer value of multi-character character constants is implementation defined"
+getCCharAsInt
+   :: LitChar -> Integer
+getCCharAsInt (LitChar  c   _) = fromIntegral (fromEnum c)
+getCCharAsInt (LitChars _cs _) = error "integer value of multi-character character constants is implementation defined"
 
+{-
 -- | return @true@ if the character constant is /wide/.
 isWideChar :: CChar -> Bool
 isWideChar (CChar _ wideFlag) = wideFlag
 isWideChar (CChars _ wideFlag) = wideFlag
+-}
 
 -- | construct a character constant from a haskell 'Char'
 -- Use 'cchar_w' if you want a wide character constant.
-cChar :: Char -> CChar
-cChar c = CChar c False
+cChar
+   :: Char
+   -> LitChar
+cChar c = LitChar c LitCharOrdinary
 
 -- | construct a wide chararacter constant
-cChar_w :: Char -> CChar
-cChar_w c = CChar c True
+cChar_w
+   :: Char
+   -> LitChar
+cChar_w c = LitChar c LitCharOrdinary
 
 -- | create a multi-character character constant
-cChars :: [Char] -> Bool -> CChar
-cChars = CChars
+cChars
+   :: [Char]
+   -> Bool
+   -> LitChar
+cChars cs False = LitChars cs LitCharOrdinary
+cChars cs True  = LitChars cs LitCharWide
 
+{-
 -- | datatype for memorizing the representation of an integer
 data CIntRepr = DecRepr | HexRepr | OctalRepr deriving (Eq,Ord,Enum,Bounded,Data,Typeable)
+-}
 
 -- | datatype representing type flags for integers
-data CIntFlag = FlagUnsigned | FlagLong | FlagLongLong | FlagImag deriving (Eq,Ord,Enum,Bounded,Data,Typeable)
+data CIntFlag = FlagUnsigned
+              | FlagLong
+              | FlagLongLong
+              | FlagImag
+     deriving (Eq,Ord,Enum,Bounded,Data,Typeable)
+
 instance Show CIntFlag where
     show FlagUnsigned = "u"
     show FlagLong = "L"
     show FlagLongLong = "LL"
     show FlagImag = "i"
 
+{-
 {-# SPECIALIZE setFlag :: CIntFlag -> Flags CIntFlag -> Flags CIntFlag #-}
 {-# SPECIALIZE clearFlag :: CIntFlag -> Flags CIntFlag -> Flags CIntFlag #-}
 {-# SPECIALIZE testFlag :: CIntFlag -> Flags CIntFlag -> Bool #-}
@@ -475,15 +498,20 @@ readCInteger repr str =
         'u' -> go1 FlagUnsigned ; 'U' -> go1 FlagUnsigned
         'i' -> go1 FlagImag ; 'I' -> go1 FlagImag; 'j' -> go1 FlagImag; 'J' -> go1 FlagImag
         _ -> Left $ "Unexpected flag " ++ show f
+-}
 
-getCInteger :: CInteger -> Integer
-getCInteger (CInteger i _ _) = i
+getCInteger
+   :: LitInteger
+   -> Integer
+getCInteger (LitInteger i _ _) = i
 
 -- | construct a integer constant (without type flags) from a haskell integer
-cInteger :: Integer -> CInteger
-cInteger i = CInteger i DecRepr noFlags
+cInteger
+   :: Integer
+   -> LitInteger
+cInteger i = LitInteger i 10 $ LitIntType False LitIntNotLong
 
-
+{-
 -- | Floats (represented as strings)
 data CFloat = CFloat
                !String
@@ -505,23 +533,41 @@ data CString = CString
                 deriving (Eq,Ord,Data,Typeable)
 instance Show CString where
     showsPrec _ (CString str wideflag) = _showWideFlag wideflag . showStringLit str
+-}
 
 -- construction
-cString :: String -> CString
-cString str = CString str False
-cString_w :: String -> CString
-cString_w str = CString str True
+cString
+   :: String
+   -> LitString
+cString str = LitString str LitStringOrdinary False
+
+cString_w
+   :: String
+   -> LitString
+cString_w str = LitString str LitStringWide False
 
 -- selectors
-getCString :: CString -> String
-getCString (CString str _) = str
-isWideString :: CString -> Bool
-isWideString (CString _ wideflag) = wideflag
+getCString
+   :: LitString
+   -> String
+getCString (LitString str _ _) = str
+
+isWideString
+   :: LitString
+   -> Bool
+isWideString (LitString _ LitStringWide _) = True
+isWideString (LitString _ _             _) = False
 
 -- | concatenate a list of C string literals
-concatCStrings :: [CString] -> CString
-concatCStrings cs = CString (concatMap getCString cs) (any isWideString cs)
+concatCStrings
+   :: [LitString]
+   -> LitString
+concatCStrings cs = LitString (concatMap getCString cs) (f $ any isWideString cs) False
+   where
+      f True  = LitStringWide
+      f False = LitStringOrdinary
 
+{-
 -- | @showStringLiteral s@ prepends a String representing the C string literal corresponding to @s@.
 -- If necessary it uses octal or hexadecimal escape sequences.
 showStringLit :: String -> ShowS
@@ -603,12 +649,17 @@ readOct' :: ReadS Int
 readOct' s = map (\(i, cs) -> (i, cs ++ rest)) (readOct octStr)
   where octStr = takeWhile isOctDigit $ take 3 s
         rest = drop (length octStr) s
+-}
 
-unescapeString :: String -> String
+unescapeString
+   :: String
+   -> String
 unescapeString [] = []
-unescapeString cs = case unescapeChar cs of
-                        (c, cs') -> c : unescapeString cs'
+unescapeString cs = 
+   case unescapeChar cs of
+      (c, cs') -> c : unescapeString cs'
 
+{-
 -- helpers
 sQuote :: String -> ShowS
 sQuote s t = "'" ++ s ++ "'" ++ t
@@ -617,6 +668,7 @@ dQuote s t = ('"' : s) ++ "\"" ++ t
 head' :: String -> [a] -> a
 head' err []  = error err
 head' _ (x:_) = x
+-}
 
 -- TODO: Move to separate file ?
 newtype Flags f = Flags Integer deriving (Eq,Ord,Data,Typeable)
@@ -628,5 +680,4 @@ clearFlag :: (Enum f) => f -> Flags f -> Flags f
 clearFlag flag (Flags k) = Flags$ k `clearBit` fromEnum flag
 testFlag :: (Enum f) => f -> Flags f -> Bool
 testFlag flag (Flags k)  = k `testBit` fromEnum flag
--}
 

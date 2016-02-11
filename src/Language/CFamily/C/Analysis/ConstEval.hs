@@ -1,13 +1,14 @@
 {-# LANGUAGE RelaxedPolyRec #-}
 module Language.CFamily.C.Analysis.ConstEval where
 
+import Language.CFamily.Constants
+
 import {-# SOURCE #-} Language.CFamily.C.Analysis.AstAnalysis (tExpr, ExprSide(..))
 import                Language.CFamily.C.Analysis.Debug()
 import                Language.CFamily.C.Analysis.DeclAnalysis
 import                Language.CFamily.C.Analysis.SemRep
 import                Language.CFamily.C.Analysis.TypeUtils
 
-import Language.CFamily.C.Constants
 import Language.CFamily.C.DefTable
 import Language.CFamily.C.TravMonad
 import Language.CFamily.C.Pretty

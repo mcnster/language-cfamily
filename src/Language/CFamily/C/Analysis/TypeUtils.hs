@@ -33,8 +33,9 @@ module Language.CFamily.C.Analysis.TypeUtils (
     getFloatType
 ) where
 
+import Language.CFamily.Constants
+
 import Language.CFamily.C.Analysis.SemRep
-import Language.CFamily.C.Constants
 
  -- | Constructor for a simple integral type.
 integral :: IntType -> Type
@@ -208,22 +209,28 @@ canonicalType t =
     FunctionType ft attrs -> simplePtr (FunctionType ft attrs)
     t' -> t'
 
+{-
 -- XXX: move to be with other flag functions
 testFlags :: Enum f => [f] -> Flags f -> Bool
 testFlags flags fi = and $ map ((flip testFlag) fi) flags
+-}
 
 -- XXX: deal with FlagImag. No representation for it in Complex.
 -- XXX: deal with invalid combinations of flags?
-getIntType :: Flags CIntFlag -> IntType
-getIntType flags | testFlags [FlagLongLong, FlagUnsigned] flags = TyULLong
-                 | testFlag  FlagLongLong flags                 = TyLLong
-                 | testFlags [FlagLong, FlagUnsigned] flags     = TyULong
-                 | testFlag  FlagLong flags                     = TyLong
-                 | testFlag  FlagUnsigned flags                 = TyUInt
-                 | otherwise                                    = TyInt
+getIntType
+   :: LitIntType
+   -> IntType
+getIntType (LitIntType True  LitIntLongLong) = TyULLong
+getIntType (LitIntType False LitIntLongLong) = TyLLong
+getIntType (LitIntType True  LitIntLong    ) = TyULong
+getIntType (LitIntType False LitIntLong    ) = TyLong
+getIntType (LitIntType True  LitIntNotLong ) = TyUInt
+getIntType (LitIntType False LitIntNotLong ) = TyInt
 
-getFloatType :: String -> FloatType
-getFloatType fs | last fs `elem` ['f', 'F'] = TyFloat
-                | last fs `elem` ['l', 'L'] = TyLDouble
-                | otherwise                 = TyDouble
+getFloatType
+   :: LitFloatType
+   -> FloatType
+getFloatType LitFloatFloat      = TyFloat
+getFloatType LitFloatDouble     = TyDouble
+getFloatType LitFloatLongDouble = TyLDouble
 

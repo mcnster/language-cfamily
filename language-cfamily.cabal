@@ -63,6 +63,8 @@ Library
                         alex >= 3.1.7
    Hs-Source-Dirs:      src
    Exposed-Modules:
+                        Language.CFamily.Constants
+                        Language.CFamily.Token
                         Language.CFamily.C.Analysis.AstAnalysis
                         Language.CFamily.C.Analysis.Builtins
                         Language.CFamily.C.Analysis.ConstEval
@@ -76,7 +78,6 @@ Library
                         Language.CFamily.C.Analysis.TypeConversions
                         Language.CFamily.C.Analysis.TypeUtils
                         Language.CFamily.C.Builtin
-                        Language.CFamily.C.Constants
                         Language.CFamily.C.DefTable
                         Language.CFamily.C.Lexer
                         Language.CFamily.C.Parser
@@ -85,14 +86,11 @@ Library
                         Language.CFamily.C.Syntax.AST
                         Language.CFamily.C.Syntax.Ops
                         Language.CFamily.C.Syntax.Utils
-                        Language.CFamily.C.Token
                         Language.CFamily.C.TravMonad
 --                        Language.CFamily.CXX.AST
-                        Language.CFamily.CXX.Constants
 --                        Language.CFamily.CXX.DefTable
                         Language.CFamily.CXX.Lexer
                         Language.CFamily.CXX.ParserMonad
-                        Language.CFamily.CXX.Token
 --                        Language.CFamily.CXX.TravMonad
                         Language.CFamily.Data.Error
                         Language.CFamily.Data.Ident

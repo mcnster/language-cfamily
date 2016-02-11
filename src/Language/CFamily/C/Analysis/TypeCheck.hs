@@ -1,11 +1,12 @@
 module Language.CFamily.C.Analysis.TypeCheck where
 
+import Language.CFamily.Constants
+
 import Language.CFamily.C.Analysis.Debug()
 import Language.CFamily.C.Analysis.SemRep
 import Language.CFamily.C.Analysis.TypeConversions
 import Language.CFamily.C.Analysis.TypeUtils
 
-import Language.CFamily.C.Constants
 import Language.CFamily.C.DefTable
 import Language.CFamily.C.Pretty
 import Language.CFamily.C.TravMonad
@@ -82,28 +83,30 @@ checkIntegral t | isIntegralType (canonicalType t) = return ()
 
 -- | Determine the type of a constant.
 constType :: (MonadCError m, MonadName m) => CConst -> m Type
-constType (CIntConst (CInteger _ _ flags) _) =
+constType (CIntConst (LitInteger _ _ flags) _) =
   return $ DirectType (TyIntegral (getIntType flags)) noTypeQuals noAttributes
-constType (CCharConst (CChar _ True) _) =
+constType (CCharConst (LitChar _ LitCharWide) _) =
   return $ DirectType (TyIntegral TyInt) noTypeQuals noAttributes
-constType (CCharConst (CChar _ False) _) =
+constType (CCharConst (LitChar _ _) _) =
   return $ DirectType (TyIntegral TyChar) noTypeQuals noAttributes
-constType (CCharConst (CChars _ _) _)  =
+constType (CCharConst (LitChars _ _) _)  =
   return $ DirectType (TyIntegral TyInt) noTypeQuals noAttributes -- XXX
-constType (CFloatConst (CFloat fs) _) =
+constType (CFloatConst (LitFloat _ fs) _) =
   return $ DirectType (TyFloating (getFloatType fs)) noTypeQuals noAttributes
 -- XXX: should strings have any type qualifiers or attributes?
-constType (CStrConst (CString chars wide) ni) =
-  do n <- genName
-     let charType | wide      = TyInt -- XXX: this isn't universal
-                  | otherwise = TyChar
-         ni' = mkNodeInfo (posOf ni) n
-         arraySize = ArraySize
+constType (CStrConst (LitString chars t _) ni) = do 
+   n <- genName
+   let
+      charType
+         | t == LitStringWide = TyInt -- XXX: this isn't universal
+         | otherwise          = TyChar
+      ni' = mkNodeInfo (posOf ni) n
+      arraySize = ArraySize
                      True -- XXX: is it static?
                      (CConst
                       (CIntConst
                        (cInteger (toInteger (length chars))) ni'))
-     return $ ArrayType (DirectType (TyIntegral charType) noTypeQuals noAttributes)
+   return $ ArrayType (DirectType (TyIntegral charType) noTypeQuals noAttributes)
                         arraySize noTypeQuals []
 
 -- | Determine whether two types are compatible.

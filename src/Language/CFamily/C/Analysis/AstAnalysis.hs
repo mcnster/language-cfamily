@@ -26,6 +26,9 @@ module Language.CFamily.C.Analysis.AstAnalysis (
     defaultMD
 )
 where
+
+import Language.CFamily.Constants
+
 import Language.CFamily.C.Analysis.SemError
 import Language.CFamily.C.Analysis.SemRep
 import Language.CFamily.C.Analysis.ConstEval
@@ -33,7 +36,6 @@ import Language.CFamily.C.Analysis.DeclAnalysis
 import Language.CFamily.C.Analysis.TypeUtils
 import Language.CFamily.C.Analysis.TypeCheck
 
-import Language.CFamily.C.Constants
 import Language.CFamily.C.DefTable
 import Language.CFamily.C.Pretty
 import Language.CFamily.C.Syntax.AST

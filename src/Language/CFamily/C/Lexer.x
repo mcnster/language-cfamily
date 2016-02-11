@@ -1,10 +1,11 @@
------------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
 -- Module      :  Lexer.x
--- Copyright   : (c) [1999..2004] Manuel M T Chakravarty
---               (c) 2005 Duncan Coutts
---               (c) 2008 Benedikt Huber
--- License     :  BSD-style
--- Maintainer  :  benedikt.huber@gmail.com
+-- Copyright   :  (c) [1999..2004] Manuel M T Chakravarty
+--                (c) 2005 Duncan Coutts
+--                (c) 2008 Benedikt Huber
+--                (c) 2016 Mick Nelso
+-- License     :  BSD3
+-- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
 --
 --  Lexer for C files, after being processed by the C preprocessor
@@ -50,24 +51,19 @@
 
 module Language.CFamily.C.Lexer (lexC, parseError) where
 
+import Language.CFamily.Constants
+import Language.CFamily.Token
+
+import Language.CFamily.C.ParserMonad
+
+import Language.CFamily.Data.Ident    (mkIdent)
+import Language.CFamily.Data.InputStream
+  (InputStream, inputStreamEmpty, takeByte, takeChar, takeChars)
+import Language.CFamily.Data.Position
+
 import Data.Char (chr, isDigit)
 import Data.Word (Word8)
 import Control.Monad (liftM, when)
-
-import Language.CFamily.Data.InputStream
-  (InputStream, inputStreamEmpty, takeByte, takeChar, takeChars)
-
--- (    InputStream, readInputStream,inputStreamToString,inputStreamFromString,
---     takeByte, takeChar, inputStreamEmpty, takeChars,
---     countLines,
--- )
-import Language.CFamily.Data.Position
-import Language.CFamily.Data.Ident    (mkIdent)
-
-import Language.CFamily.C.Constants
-
-import Language.CFamily.C.Token
-import Language.CFamily.C.ParserMonad
 }
 
 $space = [ \ \t ]                           -- horizontal white space
@@ -169,32 +165,32 @@ $identletter($identletter|$digit)*  { \pos len str -> idkwtok (takeChars len str
 
 -- integer constants (follows K&R A2.5.1, C99 6.4.4.1)
 -- NOTE: 0 is lexed as octal integer constant, and readCOctal takes care of this
-0$octdigit*@intgnusuffix?       { token_plus TokILit readCOctal }
-$digitNZ$digit*@intgnusuffix?   { token_plus TokILit (readCInteger DecRepr) }
-0[xX]$hexdigit+@intgnusuffix?   { token_plus TokILit (readCInteger HexRepr . drop 2) }
+0$octdigit*@intgnusuffix?       { doIntegerLiteral False  8 }
+$digitNZ$digit*@intgnusuffix?   { doIntegerLiteral False 10 }
+0[xX]$hexdigit+@intgnusuffix?   { doIntegerLiteral False 16 }
 
 (0$octdigit*|$digitNZ$digit*|0[xX]$hexdigit+)[uUlL]+ { token_fail "Invalid integer constant suffix" }
 
 -- character constants (follows K&R A2.5.2, C99 6.4.4.4)
 --
 -- * Universal Character Names are unsupported and cause an error.
-\'($inchar|@charesc)\'  { token TokCLit (cChar . fst . unescapeChar . tail) }
-L\'($inchar|@charesc)\' { token TokCLit (cChar_w . fst . unescapeChar . tail . tail) }
-\'($inchar|@charesc){2,}\' { token TokCLit (flip cChars False . unescapeMultiChars .tail) }
-L\'($inchar|@charesc){2,}\' { token TokCLit (flip cChars True . unescapeMultiChars . tail . tail) }
+\'($inchar|@charesc)\'  { token TokLitChar (cChar . fst . unescapeChar . tail) }
+L\'($inchar|@charesc)\' { token TokLitChar (cChar_w . fst . unescapeChar . tail . tail) }
+\'($inchar|@charesc){2,}\' { token TokLitChar (flip cChars False . unescapeMultiChars .tail) }
+L\'($inchar|@charesc){2,}\' { token TokLitChar (flip cChars True . unescapeMultiChars . tail . tail) }
 
 -- float constants (follows K&R A2.5.3. C99 6.4.4.2)
 --
 -- * NOTE: Hexadecimal floating constants without binary exponents are forbidden.
 --         They generate a lexer error, because they are hard to recognize in the parser.
-(@mantpart@exppart?|@intpart@exppart)@floatgnusuffix?  { token TokFLit readCFloat }
-@hexprefix(@hexmant|@hexdigits)@binexp@floatgnusuffix? { token TokFLit readCFloat }
+(@mantpart@exppart?|@intpart@exppart)@floatgnusuffix?  { doFloatLiteral False }
+@hexprefix(@hexmant|@hexdigits)@binexp@floatgnusuffix? { doFloatLiteral False }
 @hexprefix@hexmant                                     { token_fail "Hexadecimal floating constant requires an exponent" }
 
 -- string literal (follows K&R A2.6)
 -- C99: 6.4.5.
-\"($instr|@charesc)*\"      { token TokSLit (cString . unescapeString . init . tail) }
-L\"($instr|@charesc)*\"     { token TokSLit (cString_w . unescapeString . init . tail . tail) }
+\"($instr|@charesc)*\"      { token TokLitString (cString . unescapeString . init . tail) }
+L\"($instr|@charesc)*\"     { token TokLitString (cString_w . unescapeString . init . tail . tail) }
 
 L?\'@ucn\'                        { token_fail "Universal character names are unsupported" }
 L?\'\\[^0-7'\"\?\\abfnrtvuUx]\'     { token_fail "Invalid escape sequence" }
@@ -202,62 +198,103 @@ L?\"($inchar|@charesc)*@ucn($inchar|@charesc|@ucn)*\" { token_fail "Universal ch
 
 -- operators and separators
 --
-"("   { token_ 1 TokLParen }
-")"   { token_ 1 TokRParen  }
-"["   { token_ 1 TokLBracket }
-"]"   { token_ 1 TokRBracket }
-"->"  { token_ 2 TokArrow }
-"."   { token_ 1 TokDot }
-"!"   { token_ 1 TokExclam }
-"~"   { token_ 1 TokTilde }
-"++"  { token_ 2 TokInc }
-"--"  { token_ 2 TokDec }
-"+"   { token_ 1 TokPlus }
-"-"   { token_ 1 TokMinus }
-"*"   { token_ 1 TokStar }
-"/"   { token_ 1 TokSlash }
-"%"   { token_ 1 TokPercent }
-"&"   { token_ 1 TokAmper }
-"<<"  { token_ 2 TokShiftL }
-">>"  { token_ 2 TokShiftR }
-"<"   { token_ 1 TokLess }
-"<="  { token_ 2 TokLessEq }
-">"   { token_ 1 TokHigh }
-">="  { token_ 2 TokHighEq }
-"=="  { token_ 2 TokEqual }
-"!="  { token_ 2 TokUnequal }
-"^"   { token_ 1 TokHat }
-"|"   { token_ 1 TokBar }
-"&&"  { token_ 2 TokAnd }
-"||"  { token_ 2 TokOr }
-"?"   { token_ 1 TokQuest }
-":"   { token_ 1 TokColon }
-"="   { token_ 1 TokAssign }
-"+="  { token_ 2 TokPlusAss }
-"-="  { token_ 2 TokMinusAss }
-"*="  { token_ 2 TokStarAss }
-"/="  { token_ 2 TokSlashAss }
-"%="  { token_ 2 TokPercAss }
-"&="  { token_ 2 TokAmpAss }
-"^="  { token_ 2 TokHatAss }
-"|="  { token_ 2 TokBarAss }
-"<<=" { token_ 3 TokSLAss }
-">>=" { token_ 3 TokSRAss }
-","   { token_ 1 TokComma }
-\;    { token_ 1 TokSemic }
-"{"   { token_ 1 TokLBrace }
-"}"   { token_ 1 TokRBrace }
-"..." { token_ 3 TokEllipsis }
+"{"      { token_ 1 TokBraceL              }
+"}"      { token_ 1 TokBraceR              }
+"["      { token_ 1 TokBracketL            }
+"]"      { token_ 1 TokBracketR            }
+"("      { token_ 1 TokParenL              }
+")"      { token_ 1 TokParenR              }
+";"      { token_ 1 TokSemicolon           }
+":"      { token_ 1 TokColon               }
+"..."    { token_ 3 TokEllipsis            }
+"?"      { token_ 1 TokQuestion            }
+"."      { token_ 1 TokDot                 }
+"+"      { token_ 1 TokPlus                }
+"-"      { token_ 1 TokMinus               }
+"*"      { token_ 1 TokStar                }
+"/"      { token_ 1 TokSlash               }
+"%"      { token_ 1 TokPercent             }
+"^"      { token_ 1 TokHat                 }
+"&"      { token_ 1 TokAmpersand           }
+"|"      { token_ 1 TokBar                 }
+"~"      { token_ 1 TokTilde               }
+"="      { token_ 1 TokEqual               }
+"!"      { token_ 1 TokExclamation         }
+"<"      { token_ 1 TokLess                }
+">"      { token_ 1 TokGreater             }
+"+="     { token_ 2 TokPlusEqual           }
+"-="     { token_ 2 TokMinusEqual          }
+"*="     { token_ 2 TokStarEqual           }
+"/="     { token_ 2 TokSlashEqual          }
+"%="     { token_ 2 TokPercentEqual        }
+"^="     { token_ 2 TokHatEqual            }
+"&="     { token_ 2 TokAmpersandEqual      }
+"|="     { token_ 2 TokBarEqual            }
+"<<"     { token_ 2 TokLessLess            }
+">>"     { token_ 2 TokGreaterGreater      }
+">>="    { token_ 3 TokGreaterGreaterEqual }
+"<<="    { token_ 3 TokLessLessEqual       }
+"=="     { token_ 2 TokEqualEqual          }
+"!="     { token_ 2 TokExclamationEqual    }
+"<="     { token_ 2 TokLessEqual           }
+">="     { token_ 2 TokGreaterEqual        }
+"&&"     { token_ 2 TokAmpersandAmpersand  }
+"||"     { token_ 2 TokBarBar              }
+"++"     { token_ 2 TokPlusPlus            }
+"--"     { token_ 2 TokMinusMinus          }
+","      { token_ 1 TokComma               }
+"->"     { token_ 2 TokHyphenGreater       }
 
 
 {
+doIntegerLiteral
+   :: Bool
+   -> Int
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doIntegerLiteral u@False r p = token_plus TokLitInteger (f . readLitInteger u r p) p
+   where
+      f (Right (Left li)) = Right li
+      f (Left str)        = Left  str
+      f _                 = error "Lexer.doIntegerLiteral False"
+doIntegerLiteral u@True  r p = token_plus TokLitUserDef (f . readLitInteger u r p) p
+   where
+      f (Right (Right lud)) = Right lud
+      f (Left str)          = Left  str
+      f _                   = error "Lexer.doIntegerLiteral True"
+
+doFloatLiteral
+   :: Bool
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doFloatLiteral u@False p = token TokLitFloat   (f . readLitFloat u p) p
+   where
+      f (Left x) = x
+      f _        = error "Lexer.doFloatLiteral False"
+doFloatLiteral u@True  p = token TokLitUserDef (f . readLitFloat u p) p
+   where
+      f (Right x) = x
+      f _         = error "Lexer.doFloatLiteral True"
+
+{-
 -- Fix the 'octal' lexing of '0'
-readCOctal :: String -> Either String CInteger
+readCOctal
+   :: String
+   -> Either String LitInteger
 readCOctal s@('0':r) =
-    case r of
-        (c:_) | isDigit c -> readCInteger OctalRepr r
-        _                 -> readCInteger DecRepr s
-readCOctal _         = error "Lexer.readCOctal unhandled case"
+   case r of
+      (c:_) | isDigit c -> f $ readLitInteger False  8 nopos r
+      _                 -> f $ readLitInteger False 10 nopos r
+   where
+      f l@(Left  _       ) = l
+      f   (Right (Left x)) = Right x
+      f _                  = error "Lexer.readCOctal: unhandled case"
+readCOctal _         = error "Lexer.readCOctal: unhandled case"
+-}
 
 -- We use the odd looking list of string patterns here rather than normal
 -- string literals since GHC converts the latter into a sequence of string
@@ -374,9 +411,9 @@ ignoreAttribute = skipTokens (0::Int)
         skipTokens n = do
           tok' <- lexToken' False
           case tok' of
-            TokRParen _ | n == 1    -> return ()
+            TokParenR _ | n == 1    -> return ()
                          | otherwise -> skipTokens (n-1)
-            TokLParen _             -> skipTokens (n+1)
+            TokParenL _             -> skipTokens (n+1)
             _                        -> skipTokens n
 
 tok :: Int -> (PosLength -> Token) -> Position -> P Token

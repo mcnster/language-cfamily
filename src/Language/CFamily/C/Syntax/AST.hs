@@ -56,11 +56,14 @@ module Language.CFamily.C.Syntax.AST (
   -- * Annoated type class
   Annotated(..)
 ) where
-import Language.CFamily.C.Constants
+
+import Language.CFamily.Constants
+
 import Language.CFamily.C.Syntax.Ops
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Node
 import Language.CFamily.Data.Position
+
 import Data.Generics
 
 -- | Complete C tranlsation unit (C99 6.9, K&R A10)
@@ -687,20 +690,20 @@ data CBuiltinThing a
 -- | C constant (K&R A2.5 & A7.2)
 type CConst = CConstant NodeInfo
 data CConstant a
-  = CIntConst   CInteger a
-  | CCharConst  CChar a
-  | CFloatConst CFloat a
-  | CStrConst   CString a
+  = CIntConst   LitInteger a
+  | CCharConst  LitChar a
+  | CFloatConst LitFloat a
+  | CStrConst   LitString a
     deriving (Show, Data,Typeable {-! ,CNode ,Functor ,Annotated !-})
 
 
 -- | Attributed string literals
 type CStrLit = CStringLiteral NodeInfo
-data CStringLiteral a = CStrLit CString a
+data CStringLiteral a = CStrLit LitString a
             deriving (Show, Data,Typeable {-! ,CNode ,Functor ,Annotated !-})
 
 
-cstringOfLit :: CStringLiteral a -> CString
+cstringOfLit :: CStringLiteral a -> LitString
 cstringOfLit (CStrLit cstr _) = cstr
 
 -- | Lift a string literal to a C constant

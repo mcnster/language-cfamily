@@ -1,6 +1,6 @@
 -- ---------------------------------------------------------------------------
 --
--- Module      :  Language.CFamily.C.Token
+-- Module      :  Language.CFamily.Token
 -- Copyright   :  [1999..2004] Manuel M T Chakravarty
 --                2005 Duncan Coutts
 --                2016 Mick Nelso
@@ -12,9 +12,10 @@
 --
 -- ---------------------------------------------------------------------------
 
-module Language.CFamily.CXX.Token where
+module Language.CFamily.Token where
 
-import Language.CFamily.CXX.Constants
+import Language.CFamily.Constants
+
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Position
 
@@ -145,7 +146,7 @@ data Token = TokParenL              !PosLength            -- `('
            | TokWChar               !PosLength              -- `wchar_t'
            | TokWhile               !PosLength              -- `while'
            | TokLitChar             !PosLength  !LitChar    -- character constant
-           | TokLitInt              !PosLength  !LitInteger -- integer constant
+           | TokLitInteger          !PosLength  !LitInteger -- integer constant
            | TokLitFloat            !PosLength  !LitFloat   -- float constant
            | TokLitString           !PosLength  LitString   -- string constant
            | TokLitPtr              !PosLength              -- `nullptr'
@@ -177,103 +178,141 @@ instance Pos Token where
 posLenOfTok
    :: Token
    -> (Position, Int)
-posLenOfTok (TokParenL       pos  ) = pos
-{-
-posLenOfTok (TokParenR       pos  ) = pos
-posLenOfTok (TokBracketL     pos  ) = pos
-posLenOfTok (TokBracketR     pos  ) = pos
-posLenOfTok (TokHypenGreater pos  ) = pos
-posLenOfTok (TokDot          pos  ) = pos
-posLenOfTok (TokExclamation  pos  ) = pos
-posLenOfTok (TokTilde    pos  ) = pos
-posLenOfTok (TokPlusPlus pos  ) = pos
-posLenOfTok (TokMinusMinus pos  ) = pos
-posLenOfTok (TokPlus     pos  ) = pos
-posLenOfTok (TokMinus    pos  ) = pos
-posLenOfTok (TokStar     pos  ) = pos
-posLenOfTok (TokSlash    pos  ) = pos
-posLenOfTok (TokPercent  pos  ) = pos
-posLenOfTok (TokAmpersand    pos  ) = pos
-posLenOfTok (TokLessLess   pos  ) = pos
-posLenOfTok (TokGreaterGreater   pos  ) = pos
-posLenOfTok (TokLess     pos  ) = pos
-posLenOfTok (TokLessEq   pos  ) = pos
-posLenOfTok (TokHigh     pos  ) = pos
-posLenOfTok (TokHighEq   pos  ) = pos
-posLenOfTok (TokEqual    pos  ) = pos
-posLenOfTok (TokUnequal  pos  ) = pos
-posLenOfTok (TokHat      pos  ) = pos
-posLenOfTok (TokBar      pos  ) = pos
-posLenOfTok (TokAnd      pos  ) = pos
-posLenOfTok (TokOr       pos  ) = pos
-posLenOfTok (TokQuest    pos  ) = pos
-posLenOfTok (TokColon    pos  ) = pos
-posLenOfTok (TokAssign   pos  ) = pos
-posLenOfTok (TokPlusAss  pos  ) = pos
-posLenOfTok (TokMinusAss pos  ) = pos
-posLenOfTok (TokStarAss  pos  ) = pos
-posLenOfTok (TokSlashAss pos  ) = pos
-posLenOfTok (TokPercAss  pos  ) = pos
-posLenOfTok (TokAmpAss   pos  ) = pos
-posLenOfTok (TokHatAss   pos  ) = pos
-posLenOfTok (TokBarAss   pos  ) = pos
-posLenOfTok (TokSLAss    pos  ) = pos
-posLenOfTok (TokSRAss    pos  ) = pos
-posLenOfTok (TokComma    pos  ) = pos
-posLenOfTok (TokSemic    pos  ) = pos
-posLenOfTok (TokLBrace   pos  ) = pos
-posLenOfTok (TokRBrace   pos  ) = pos
-posLenOfTok (TokEllipsis pos  ) = pos
-posLenOfTok (TokAlignof  pos  ) = pos
-posLenOfTok (TokAsm      pos  ) = pos
-posLenOfTok (TokAuto     pos  ) = pos
-posLenOfTok (TokBreak    pos  ) = pos
-posLenOfTok (TokBool     pos  ) = pos
-posLenOfTok (TokCase     pos  ) = pos
-posLenOfTok (TokChar     pos  ) = pos
-posLenOfTok (TokConst    pos  ) = pos
-posLenOfTok (TokContinue pos  ) = pos
-posLenOfTok (TokComplex  pos  ) = pos
-posLenOfTok (TokDefault  pos  ) = pos
-posLenOfTok (TokDo       pos  ) = pos
-posLenOfTok (TokDouble   pos  ) = pos
-posLenOfTok (TokElse     pos  ) = pos
-posLenOfTok (TokEnum     pos  ) = pos
-posLenOfTok (TokExtern   pos  ) = pos
-posLenOfTok (TokFloat    pos  ) = pos
-posLenOfTok (TokFor      pos  ) = pos
-posLenOfTok (TokGoto     pos  ) = pos
-posLenOfTok (TokInt      pos  ) = pos
-posLenOfTok (TokInline   pos  ) = pos
-posLenOfTok (TokIf       pos  ) = pos
-posLenOfTok (TokLong     pos  ) = pos
-posLenOfTok (TokLabel    pos  ) = pos
-posLenOfTok (TokRegister pos  ) = pos
-posLenOfTok (TokRestrict pos  ) = pos
-posLenOfTok (TokReturn   pos  ) = pos
-posLenOfTok (TokShort    pos  ) = pos
-posLenOfTok (TokSigned   pos  ) = pos
-posLenOfTok (TokSizeof   pos  ) = pos
-posLenOfTok (TokStatic   pos  ) = pos
-posLenOfTok (TokStruct   pos  ) = pos
-posLenOfTok (TokSwitch   pos  ) = pos
-posLenOfTok (TokTypedef  pos  ) = pos
-posLenOfTok (TokTypeof   pos  ) = pos
-posLenOfTok (TokThread   pos  ) = pos
-posLenOfTok (TokUnion    pos  ) = pos
-posLenOfTok (TokUnsigned pos  ) = pos
-posLenOfTok (TokVoid     pos  ) = pos
-posLenOfTok (TokVolatile pos  ) = pos
-posLenOfTok (TokWhile    pos  ) = pos
-posLenOfTok (TokCLit     pos _) = pos
-posLenOfTok (TokILit     pos _) = pos
-posLenOfTok (TokFLit     pos _) = pos
-posLenOfTok (TokSLit     pos _) = pos
-posLenOfTok (TokIdent    pos _) = pos
-posLenOfTok (TokTyIdent  pos _) = pos
-posLenOfTok (TokGnuC   _ pos  ) = pos
-posLenOfTok TokEof              = error "posLenOfTok: Eof"
--}
+posLenOfTok (TokParenL              pos  ) = pos
+posLenOfTok (TokParenR              pos  ) = pos
+posLenOfTok (TokBracketL            pos  ) = pos
+posLenOfTok (TokBracketR            pos  ) = pos
+posLenOfTok (TokBarBar              pos  ) = pos
+posLenOfTok (TokDotStar             pos  ) = pos
+posLenOfTok (TokColonColon          pos  ) = pos
+posLenOfTok (TokHyphenGreaterStar   pos  ) = pos
+posLenOfTok (TokHyphenGreater       pos  ) = pos
+posLenOfTok (TokDot                 pos  ) = pos
+posLenOfTok (TokExclamation         pos  ) = pos
+posLenOfTok (TokTilde               pos  ) = pos
+posLenOfTok (TokPlusPlus            pos  ) = pos
+posLenOfTok (TokMinusMinus          pos  ) = pos
+posLenOfTok (TokPlus                pos  ) = pos
+posLenOfTok (TokMinus               pos  ) = pos
+posLenOfTok (TokStar                pos  ) = pos
+posLenOfTok (TokSlash               pos  ) = pos
+posLenOfTok (TokPercent             pos  ) = pos
+posLenOfTok (TokAmpersand           pos  ) = pos
+posLenOfTok (TokLessLess            pos  ) = pos
+posLenOfTok (TokGreaterGreater      pos  ) = pos
+posLenOfTok (TokLess                pos  ) = pos
+posLenOfTok (TokLessEqual           pos  ) = pos
+posLenOfTok (TokGreater             pos  ) = pos
+posLenOfTok (TokGreaterEqual        pos  ) = pos
+posLenOfTok (TokEqualEqual          pos  ) = pos
+posLenOfTok (TokExclamationEqual    pos  ) = pos
+posLenOfTok (TokHat                 pos  ) = pos
+posLenOfTok (TokBar                 pos  ) = pos
+posLenOfTok (TokAmpersandAmpersand  pos  ) = pos
+posLenOfTok (TokQuestion            pos  ) = pos
+posLenOfTok (TokColon               pos  ) = pos
+posLenOfTok (TokEqual               pos  ) = pos
+posLenOfTok (TokPlusEqual           pos  ) = pos
+posLenOfTok (TokMinusEqual          pos  ) = pos
+posLenOfTok (TokStarEqual           pos  ) = pos
+posLenOfTok (TokSlashEqual          pos  ) = pos
+posLenOfTok (TokPercentEqual        pos  ) = pos
+posLenOfTok (TokAmpersandEqual      pos  ) = pos
+posLenOfTok (TokHatEqual            pos  ) = pos
+posLenOfTok (TokBarEqual            pos  ) = pos
+posLenOfTok (TokLessLessEqual       pos  ) = pos
+posLenOfTok (TokGreaterGreaterEqual pos  ) = pos
+posLenOfTok (TokComma               pos  ) = pos
+posLenOfTok (TokSemicolon           pos  ) = pos
+posLenOfTok (TokBraceL              pos  ) = pos
+posLenOfTok (TokBraceR              pos  ) = pos
+posLenOfTok (TokEllipsis            pos  ) = pos
+posLenOfTok (TokAlignas             pos  ) = pos
+posLenOfTok (TokAlignof             pos  ) = pos
+posLenOfTok (TokAsm                 pos  ) = pos
+posLenOfTok (TokAuto                pos  ) = pos
+posLenOfTok (TokBreak               pos  ) = pos
+posLenOfTok (TokBool                pos  ) = pos
+posLenOfTok (TokCase                pos  ) = pos
+posLenOfTok (TokCatch               pos  ) = pos
+posLenOfTok (TokChar                pos  ) = pos
+posLenOfTok (TokChar16              pos  ) = pos
+posLenOfTok (TokChar32              pos  ) = pos
+posLenOfTok (TokClass               pos  ) = pos
+posLenOfTok (TokConst               pos  ) = pos
+posLenOfTok (TokConstExpr           pos  ) = pos
+posLenOfTok (TokConstCast           pos  ) = pos
+posLenOfTok (TokContinue            pos  ) = pos
+posLenOfTok (TokComplex             pos  ) = pos
+posLenOfTok (TokDeclType            pos  ) = pos
+posLenOfTok (TokDefault             pos  ) = pos
+posLenOfTok (TokDelete              pos  ) = pos
+posLenOfTok (TokDo                  pos  ) = pos
+posLenOfTok (TokDouble              pos  ) = pos
+posLenOfTok (TokDynCast             pos  ) = pos
+posLenOfTok (TokElse                pos  ) = pos
+posLenOfTok (TokEnum                pos  ) = pos
+posLenOfTok (TokExplicit            pos  ) = pos
+posLenOfTok (TokExport              pos  ) = pos
+posLenOfTok (TokExtern              pos  ) = pos
+posLenOfTok (TokFalse               pos  ) = pos
+posLenOfTok (TokFloat               pos  ) = pos
+posLenOfTok (TokFor                 pos  ) = pos
+posLenOfTok (TokFriend              pos  ) = pos
+posLenOfTok (TokGoto                pos  ) = pos
+posLenOfTok (TokIf                  pos  ) = pos
+posLenOfTok (TokInline              pos  ) = pos
+posLenOfTok (TokInt                 pos  ) = pos
+posLenOfTok (TokLong                pos  ) = pos
+posLenOfTok (TokLabel               pos  ) = pos
+posLenOfTok (TokMutable             pos  ) = pos
+posLenOfTok (TokNamespace           pos  ) = pos
+posLenOfTok (TokNew                 pos  ) = pos
+posLenOfTok (TokNoExcept            pos  ) = pos
+posLenOfTok (TokOperator            pos  ) = pos
+posLenOfTok (TokPrivate             pos  ) = pos
+posLenOfTok (TokProtected           pos  ) = pos
+posLenOfTok (TokPublic              pos  ) = pos
+posLenOfTok (TokRegister            pos  ) = pos
+posLenOfTok (TokReinterpretCast     pos  ) = pos
+posLenOfTok (TokRestrict            pos  ) = pos
+posLenOfTok (TokReturn              pos  ) = pos
+posLenOfTok (TokShort               pos  ) = pos
+posLenOfTok (TokSigned              pos  ) = pos
+posLenOfTok (TokSizeof              pos  ) = pos
+posLenOfTok (TokStatic              pos  ) = pos
+posLenOfTok (TokStaticAssert        pos  ) = pos
+posLenOfTok (TokStaticCast          pos  ) = pos
+posLenOfTok (TokStruct              pos  ) = pos
+posLenOfTok (TokSwitch              pos  ) = pos
+posLenOfTok (TokTemplate            pos  ) = pos
+posLenOfTok (TokThis                pos  ) = pos
+posLenOfTok (TokThreadLocal         pos  ) = pos
+posLenOfTok (TokThrow               pos  ) = pos
+posLenOfTok (TokTrue                pos  ) = pos
+posLenOfTok (TokTypedef             pos  ) = pos
+posLenOfTok (TokTypeid              pos  ) = pos
+posLenOfTok (TokTypename            pos  ) = pos
+posLenOfTok (TokTypeof              pos  ) = pos
+posLenOfTok (TokThread              pos  ) = pos
+posLenOfTok (TokUnion               pos  ) = pos
+posLenOfTok (TokUnsigned            pos  ) = pos
+posLenOfTok (TokUsing               pos  ) = pos
+posLenOfTok (TokVirtual             pos  ) = pos
+posLenOfTok (TokVoid                pos  ) = pos
+posLenOfTok (TokVolatile            pos  ) = pos
+posLenOfTok (TokWChar               pos  ) = pos
+posLenOfTok (TokWhile               pos  ) = pos
+posLenOfTok (TokLitChar             pos _) = pos
+posLenOfTok (TokLitInteger          pos _) = pos
+posLenOfTok (TokLitFloat            pos _) = pos
+posLenOfTok (TokLitString           pos _) = pos
+posLenOfTok (TokLitPtr              pos  ) = pos
+posLenOfTok (TokLitUserDef          pos _) = pos
+posLenOfTok (TokIdent               pos _) = pos
+posLenOfTok (TokTyIdent             pos _) = pos
+posLenOfTok (TokGnuC              _ pos  ) = pos
+posLenOfTok (TokEof                      ) = error "Token.posLenOfTok: TokEof"
 
 {-
 -- MCNFIXME: C++ not implemented

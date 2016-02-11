@@ -1,11 +1,12 @@
------------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
 -- Module      :  Parser.y
--- Copyright   :  (c) 2005-2007 Duncan Coutts
+-- Copyright   :  (c) 2016 Mick Nelso
+--                (c) 2005-2007 Duncan Coutts
 --                (c) 2008 Benedikt Huber
 --                (c) [1999..2004] Manuel M T Chakravarty
 --                Portions copyright 1989, 1990 James A. Roskind
 -- License     :  BSD-style
--- Maintainer  :  benedikt.huber@gmail.com
+-- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
 --
 --  Parser for C translation units, which have already been run through the C
@@ -27,7 +28,9 @@
 -- The set of supported extensions is documented in
 --
 --    <http://www.sivity.net/projects/language.c/wiki/Cee>
-------------------------------------------------------------------
+--
+-- ----------------------------------------------------------------------------
+
 {
 module Language.CFamily.C.Parser (
   -- * Parse a C translation unit
@@ -102,10 +105,11 @@ module Language.CFamily.C.Parser (
 --  !* see `We're being far to liberal here' (... struct definition within structs)
 --  * Documentation isn't complete and consistent yet.
 
+import Language.CFamily.Constants
+import Language.CFamily.Token
+
 import Language.CFamily.C.Builtin   (builtinTypeNames)
-import Language.CFamily.C.Constants
 import Language.CFamily.C.Lexer     (lexC, parseError)
-import Language.CFamily.C.Token    (Token(..), GnuTok(..), posLenOfTok)
 import Language.CFamily.C.ParserMonad (P, failP, execParser, getNewName, addTypedef, shadowTypedef, getCurrentPosition,
                                       enterScope, leaveScope, getLastToken, getSavedToken, ParseError(..))
 import Language.CFamily.C.Syntax.AST
@@ -136,51 +140,51 @@ import Control.Monad (mplus)
 
 %token
 
-'('		{ TokLParen	_ }
-')'		{ TokRParen	_ }
-'['		{ TokLBracket	_ }
-']'		{ TokRBracket	_ }
-"->"		{ TokArrow	_ }
+'('		{ TokParenL	_ }
+')'		{ TokParenR	_ }
+'['		{ TokBracketL	_ }
+']'		{ TokBracketR	_ }
+"->"		{ TokHyphenGreater	_ }
 '.'		{ TokDot	_ }
-'!'		{ TokExclam	_ }
+'!'		{ TokExclamation	_ }
 '~'		{ TokTilde	_ }
-"++"		{ TokInc	_ }
-"--"		{ TokDec	_ }
+"++"		{ TokPlusPlus	_ }
+"--"		{ TokMinusMinus	_ }
 '+'		{ TokPlus	_ }
 '-'		{ TokMinus	_ }
 '*'		{ TokStar	_ }
 '/'		{ TokSlash	_ }
 '%'		{ TokPercent	_ }
-'&'		{ TokAmper	_ }
-"<<"		{ TokShiftL	_ }
-">>"		{ TokShiftR	_ }
+'&'		{ TokAmpersand	_ }
+"<<"		{ TokLessLess	_ }
+">>"		{ TokGreaterGreater	_ }
 '<'		{ TokLess	_ }
-"<="		{ TokLessEq	_ }
-'>'		{ TokHigh	_ }
-">="		{ TokHighEq	_ }
-"=="		{ TokEqual	_ }
-"!="		{ TokUnequal	_ }
+"<="		{ TokLessEqual	_ }
+'>'		{ TokGreater	_ }
+">="		{ TokGreaterEqual	_ }
+"=="		{ TokEqualEqual	_ }
+"!="		{ TokExclamationEqual	_ }
 '^'		{ TokHat	_ }
 '|'		{ TokBar	_ }
-"&&"		{ TokAnd	_ }
-"||"		{ TokOr	_ }
-'?'		{ TokQuest	_ }
+"&&"		{ TokAmpersandAmpersand	_ }
+"||"		{ TokBarBar	_ }
+'?'		{ TokQuestion	_ }
 ':'		{ TokColon	_ }
-'='		{ TokAssign	_ }
-"+="		{ TokPlusAss	_ }
-"-="		{ TokMinusAss	_ }
-"*="		{ TokStarAss	_ }
-"/="		{ TokSlashAss	_ }
-"%="		{ TokPercAss	_ }
-"&="		{ TokAmpAss	_ }
-"^="		{ TokHatAss	_ }
-"|="		{ TokBarAss	_ }
-"<<="		{ TokSLAss	_ }
-">>="		{ TokSRAss	_ }
+'='		{ TokEqual	_ }
+"+="		{ TokPlusEqual	_ }
+"-="		{ TokMinusEqual	_ }
+"*="		{ TokStarEqual	_ }
+"/="		{ TokSlashEqual	_ }
+"%="		{ TokPercentEqual	_ }
+"&="		{ TokAmpersandEqual	_ }
+"^="		{ TokHatEqual	_ }
+"|="		{ TokBarEqual	_ }
+"<<="		{ TokLessLessEqual	_ }
+">>="		{ TokGreaterGreaterEqual	_ }
 ','		{ TokComma	_ }
-';'		{ TokSemic	_ }
-'{'		{ TokLBrace	_ }
-'}'		{ TokRBrace	_ }
+';'		{ TokSemicolon	_ }
+'{'		{ TokBraceL	_ }
+'}'		{ TokBraceR	_ }
 "..."		{ TokEllipsis	_ }
 alignof		{ TokAlignof	_ }
 asm		{ TokAsm	_ }
@@ -223,10 +227,10 @@ unsigned	{ TokUnsigned	_ }
 void		{ TokVoid	_ }
 volatile	{ TokVolatile	_ }
 while		{ TokWhile	_ }
-cchar		{ TokCLit   _ _ }		-- character constant
-cint		{ TokILit   _ _ }		-- integer constant
-cfloat		{ TokFLit   _ _ }		-- float constant
-cstr		{ TokSLit   _ _ }		-- string constant (no escapes)
+cchar		{ TokLitChar   _ _ }		-- character constant
+cint		{ TokLitInteger   _ _ }		-- integer constant
+cfloat		{ TokLitFloat   _ _ }		-- float constant
+cstr		{ TokLitString   _ _ }		-- string constant (no escapes)
 ident		{ TokIdent  _ $$ }		-- identifier
 tyident		{ TokTyIdent _ $$ }		-- `typedef-name' identifier
 "__attribute__"	{ TokGnuC GnuCAttrTok _ }	-- special GNU C tokens
@@ -2008,24 +2012,24 @@ constant_expression
 --
 constant :: { CConst }
 constant
-  : cint	  {% withNodeInfo $1 $ case $1 of TokILit _ i -> CIntConst i }
-  | cchar	  {% withNodeInfo $1 $ case $1 of TokCLit _ c -> CCharConst c }
-  | cfloat	{% withNodeInfo $1 $ case $1 of TokFLit _ f -> CFloatConst f }
+  : cint	  {% withNodeInfo $1 $ case $1 of TokLitInteger _ i -> CIntConst i }
+  | cchar	  {% withNodeInfo $1 $ case $1 of TokLitChar _ c -> CCharConst c }
+  | cfloat	{% withNodeInfo $1 $ case $1 of TokLitFloat _ f -> CFloatConst f }
 
 
 string_literal :: { CStrLit }
 string_literal
   : cstr
-  	{% withNodeInfo $1 $ case $1 of TokSLit _ s -> CStrLit s }
+  	{% withNodeInfo $1 $ case $1 of TokLitString _ s -> CStrLit s }
 
   | cstr string_literal_list
-  	{% withNodeInfo $1 $ case $1 of TokSLit _ s -> CStrLit (concatCStrings (s : reverse $2)) }
+  	{% withNodeInfo $1 $ case $1 of TokLitString _ s -> CStrLit (concatCStrings (s : reverse $2)) }
 
 
-string_literal_list :: { Reversed [CString] }
+string_literal_list :: { Reversed [LitString] }
 string_literal_list
-  : cstr			{ case $1 of TokSLit _ s -> singleton s }
-  | string_literal_list cstr	{ case $2 of TokSLit _ s -> $1 `snoc` s }
+  : cstr			{ case $1 of TokLitString _ s -> singleton s }
+  | string_literal_list cstr	{ case $2 of TokLitString _ s -> $1 `snoc` s }
 
 
 identifier :: { Ident }

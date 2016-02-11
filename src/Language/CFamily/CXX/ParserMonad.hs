@@ -20,13 +20,13 @@
 --  enter an inner scope.
 module Language.CFamily.CXX.ParserMonad where
 
+import Language.CFamily.Token
+
 import Language.CFamily.Data.Error (internalErr, showErrorInfo,ErrorInfo(..),ErrorLevel(..))
 import Language.CFamily.Data.Position  (Position(..))
 import Language.CFamily.Data.InputStream
 import Language.CFamily.Data.Name    (Name)
 import Language.CFamily.Data.Ident    (Ident)
-
-import Language.CFamily.CXX.Token
 
 import Control.Monad (liftM, ap)
 import Data.Set  (Set)

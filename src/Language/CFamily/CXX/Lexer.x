@@ -15,9 +15,11 @@
 {
 module Language.CFamily.CXX.Lexer where
 
-import Language.CFamily.CXX.Constants
+import Language.CFamily.Constants
+import Language.CFamily.Token
+
 import Language.CFamily.CXX.ParserMonad
-import Language.CFamily.CXX.Token
+
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.InputStream
 import Language.CFamily.Data.Position
@@ -465,7 +467,7 @@ doIntegerLiteral
    -> Int
    -> InputStream
    -> P Token
-doIntegerLiteral u@False r p = token_plus TokLitInt     (f . readLitInteger u r p) p
+doIntegerLiteral u@False r p = token_plus TokLitInteger (f . readLitInteger u r p) p
    where
       f (Right (Left li)) = Right li
       f (Left str)        = Left  str
