@@ -18,13 +18,16 @@ module Language.CFamily.C.Pretty (
     -- * Testing
     prettyUsingInclude
 ) where
+
+import Language.CFamily.C.Syntax.AST
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Node
+import Language.CFamily.Data.Position
+
 import Data.List (isSuffixOf)
 import qualified Data.Set as Set
 import Text.PrettyPrint.HughesPJ
 import Debug.Trace {- for warnings -}
-
-import Language.CFamily.Data hiding (empty, reverse)
-import Language.CFamily.C.Syntax
 
 -- | A class of types which can be pretty printed
 class Pretty p where

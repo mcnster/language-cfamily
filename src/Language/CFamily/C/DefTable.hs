@@ -1,7 +1,6 @@
-{-# LANGUAGE PatternGuards, DeriveDataTypeable  #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.CFamily.C.Analysis.DefTable
+-- Module      :  Language.C.Analysis.DefTable
 -- Copyright   :  (c) 2008 Benedikt Huber
 --                  based on code from c2hs
 --                (c) [1999..2001] Manuel M. T. Chakravarty
@@ -16,7 +15,7 @@
 -- simply called `identifier'), tag names (names of struct\/union\/enum types),
 -- labels and structure members.
 -----------------------------------------------------------------------------
-module Language.CFamily.Data.DefTable (
+module Language.CFamily.C.DefTable (
     IdentEntry, identOfTyDecl,
     TagEntry, TagFwdDecl(..),
     DefTable(..),
@@ -33,11 +32,11 @@ module Language.CFamily.Data.DefTable (
     mergeDefTable
 )
 where
+import Language.CFamily.C.Analysis.NameSpaceMap
+import Language.CFamily.C.Analysis.SemRep
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Name
 import Language.CFamily.Data.Node
-import Language.CFamily.C.Analysis.NameSpaceMap
-import Language.CFamily.C.Analysis.SemRep
 
 import qualified Data.Map as Map
 import Data.IntMap (IntMap, union)
@@ -281,7 +280,7 @@ defineTag sueref def deftbl =
     redeclStatus =
       case olddecl of
         Just fwd_decl@(Left _) | tagKind fwd_decl == tagKind (Right def) -> NewDecl -- should be NewDef
-                                  | otherwise -> KindMismatch fwd_decl
+                               | otherwise -> KindMismatch fwd_decl
         _ -> defRedeclStatusLocal compatTagEntry sueref (Right def) olddecl (tagDecls deftbl)
 
 -- | define a label

@@ -1,6 +1,6 @@
 -- ---------------------------------------------------------------------------
 --
--- Module      :  Language.CFamily.Token
+-- Module      :  Language.CFamily.C.Token
 -- Copyright   :  [1999..2004] Manuel M T Chakravarty
 --                2005 Duncan Coutts
 --                2016 Mick Nelso
@@ -12,9 +12,9 @@
 --
 -- ---------------------------------------------------------------------------
 
-module Language.CFamily.Token where
+module Language.CFamily.CXX.Token where
 
-import Language.CFamily.Constants
+import Language.CFamily.CXX.Constants
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Position
 
@@ -152,9 +152,10 @@ data Token = TokParenL              !PosLength            -- `('
            | TokLitUserDef          !PosLength  LitUserDef
            | TokIdent               !PosLength  !Ident      -- identifier
            | TokTyIdent             !PosLength  !Ident      -- `typedef-name' identifier
+           | TokGnuC                !PosLength
            | TokEof                                         -- end of file
      deriving (Show)
-{-
+
 -- Special tokens used in GNU C extensions to ANSI C.
 --
 data GnuTok = GnuCAttrTok              -- `__attribute__'
@@ -166,7 +167,7 @@ data GnuTok = GnuCAttrTok              -- `__attribute__'
             | GnuCComplexImag          -- `__imag__'
             | GnuCInt128               -- `__int128
      deriving (Show)
--}
+
 instance Pos Token where
    posOf = fst . posLenOfTok
 

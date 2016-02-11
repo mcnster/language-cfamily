@@ -1,8 +1,6 @@
-{-# LANGUAGE MultiParamTypeClasses, TypeSynonymInstances, FlexibleContexts,FlexibleInstances,
-             PatternGuards, RankNTypes, ScopedTypeVariables #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.CFamily.C.Analysis.TravMonad
+-- Module      :  Language.C.Analysis.TravMonad
 -- Copyright   :  (c) 2008 Benedikt Huber
 -- License     :  BSD-style
 -- Maintainer  :  benedikt.huber@gmail.com
@@ -15,7 +13,7 @@
 -- name generation facilities.
 -- Furthermore, the user may provide callbacks to handle declarations and definitions.
 -----------------------------------------------------------------------------
-module Language.CFamily.Data.TravMonad (
+module Language.CFamily.C.TravMonad (
     -- * Name generation monad
     MonadName(..),
     -- * Symbol table monad
@@ -52,9 +50,6 @@ module Language.CFamily.Data.TravMonad (
     mapMaybeM,maybeM,mapSndM,concatMapM,
 )
 where
-
-import qualified Language.CFamily.Data.DefTable as ST
-import Language.CFamily.Data.DefTable
 import Language.CFamily.Data.Error
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Name
@@ -64,6 +59,8 @@ import Language.CFamily.Data.RList as RList
 import Language.CFamily.C.Analysis.Builtins
 import Language.CFamily.C.Analysis.SemError
 import Language.CFamily.C.Analysis.SemRep
+import Language.CFamily.C.DefTable
+import qualified Language.CFamily.C.DefTable as ST
 
 import Language.CFamily.C.Syntax.AST
 
@@ -155,8 +152,8 @@ redefErr :: (MonadCError m, CNode old, CNode new) =>
 redefErr name lvl new old kind =
   throwTravError $ redefinition lvl (show name) kind (nodeInfo new) (nodeInfo old)
 
-{-
 -- TODO: unused
+{-
 checkIdentTyRedef :: (MonadCError m) => IdentEntry -> (DeclarationStatus IdentEntry) -> m ()
 checkIdentTyRedef (Right decl) status = checkVarRedef decl status
 checkIdentTyRedef (Left tydef) (KindMismatch old_def) =
@@ -455,15 +452,7 @@ instance MonadCError (Trav s) where
 instance MonadTrav (Trav s) where
     -- handling declarations and definitions
     handleDecl d = ($ d) =<< gets doHandleExtDecl
-{-
-instance (MonadIO m) => MonadIO (TravT s m) where
-    liftIO = lift . liftIO
 
-instance MonadTrans (Trav s) where
-    lift m = Trav $ \ s -> do
-        a <- m
-        return (a, s)
--}
 -- | The variety of the C language to accept. Note: this is not yet enforced.
 data CLanguage = C89 | C99 | GNU89 | GNU99
 

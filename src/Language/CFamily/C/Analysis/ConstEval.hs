@@ -1,19 +1,27 @@
 {-# LANGUAGE RelaxedPolyRec #-}
 module Language.CFamily.C.Analysis.ConstEval where
 
+import {-# SOURCE #-} Language.CFamily.C.Analysis.AstAnalysis (tExpr, ExprSide(..))
+import                Language.CFamily.C.Analysis.Debug()
+import                Language.CFamily.C.Analysis.DeclAnalysis
+import                Language.CFamily.C.Analysis.SemRep
+import                Language.CFamily.C.Analysis.TypeUtils
+
+import Language.CFamily.C.Constants
+import Language.CFamily.C.DefTable
+import Language.CFamily.C.TravMonad
+import Language.CFamily.C.Pretty
+
+import Language.CFamily.C.Syntax.AST
+
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Node
+import Language.CFamily.Data.Position
+
 import Control.Monad
 import Data.Bits
 import Data.Maybe
 import qualified Data.Map as Map
-import Language.CFamily.C.Syntax.AST
-import Language.CFamily.Constants
-import {-# SOURCE #-} Language.CFamily.C.Analysis.AstAnalysis (tExpr, ExprSide(..))
-import Language.CFamily.C.Analysis.Debug()
-import Language.CFamily.C.Analysis.DeclAnalysis
-import Language.CFamily.Data
-import Language.CFamily.C.Pretty
-import Language.CFamily.C.Analysis.SemRep
-import Language.CFamily.C.Analysis.TypeUtils
 import Text.PrettyPrint.HughesPJ
 
 data MachineDesc =

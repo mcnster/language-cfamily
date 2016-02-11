@@ -1,6 +1,6 @@
 module Language.CFamily.C.Analysis.Builtins (builtins) where
 
-import Language.CFamily.Data.DefTable
+import Language.CFamily.C.DefTable
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Node
 import Language.CFamily.C.Analysis.SemRep

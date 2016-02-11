@@ -2,7 +2,7 @@ module Main where
 
 import Language.CFamily.C.Builtin
 import Language.CFamily.CXX.Lexer
-import Language.CFamily.Token
+import Language.CFamily.C.Token
 import Language.CFamily.Data.Error
 import Language.CFamily.Data.Ident    (Ident)
 import Language.CFamily.Data.InputStream

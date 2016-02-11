@@ -15,12 +15,19 @@
 {
 module Language.CFamily.CXX.Lexer where
 
-import Language.CFamily.Constants
-import Language.CFamily.Data
-import Language.CFamily.Lexer
-import Language.CFamily.Token
+import Language.CFamily.CXX.Constants
+import Language.CFamily.CXX.ParserMonad
+import Language.CFamily.CXX.Token
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.InputStream
+import Language.CFamily.Data.Name
+import Language.CFamily.Data.Position
 
-import Control.Monad (when)
+import Control.Monad
+
+import Data.Bits
+import Data.Char hiding (readLitChar)
+import Data.Word
 }
 
 -- 2.2 Phases of Translation [ISO-C++2014]
@@ -365,6 +372,295 @@ idkwtok ('v' : 'o' : 'i' : 'd' : []) = tok 4 TokVoid
 idkwtok ('v' : 'o' : 'l' : 'a' : 't' : 'i' : 'l' : 'e' : []) = tok 8 TokVolatile
 idkwtok ('w' : 'c' : 'h' : 'a' : 'r' : '_' : 't' : []) = tok 7 TokWChar
 idkwtok ('w' : 'h' : 'i' : 'l' : 'e' : []) = tok 5 TokWhile
+idkwtok cs = \pos -> do
+   name <- getNewName
+   let len = case length cs of l -> l
+   let ident = mkIdent pos cs name
+   tyident <- isTypeIdent ident
+   if tyident
+      then
+         return (TokTyIdent (pos,len) ident)
+      else
+         return (TokIdent   (pos,len) ident)
 
-#include "src/Language/CFamily/Lexer.hs-inc"
+ignoreAttribute
+   :: P ()
+ignoreAttribute = skipTokens (0 :: Int)
+   where
+      skipTokens
+         :: Int
+         -> P ()
+      skipTokens n = do
+         tok' <- lexToken' False
+         case tok' of
+            TokParenR _ | n == 1    -> return ()
+                         | otherwise -> skipTokens (n-1)
+            TokParenL _             -> skipTokens (n+1)
+            _                        -> skipTokens n
+
+-- there is a problem with ignored tokens here (that aren't skipped)
+-- consider
+-- 1 > int x;
+-- 2 > LINE "ex.c" 4
+-- 4 > int y;
+-- when we get to LINE, we have [int (1,1),x (1,4)] in the token cache.
+-- Now we run
+-- > action  (pos 2,0) 14 "LINE \"ex.c\" 3\n"
+-- which in turn adjusts the position and then calls lexToken again
+-- we get `int (pos 4,0)', and have [x (1,4), int (4,1) ] in the token cache (fine)
+-- but then, we again call setLastToken when returning and get [int (4,1),int (4,1)] in the token cache (bad)
+-- to resolve this, recursive calls invoke lexToken' False.
+lexToken
+   :: P Token
+lexToken = lexToken' True
+
+lexToken'
+   :: Bool
+   -> P Token
+lexToken' modifyCache =
+   do
+      pos <- getPos
+      inp <- getInput
+      case alexScan (pos, inp) 0 of
+         AlexEOF -> do
+            handleEofToken
+            return TokEof
+         AlexError _ -> lexicalError
+         AlexSkip  (pos', inp') _ -> do
+            setPos pos'
+            setInput inp'
+            lexToken' modifyCache
+         AlexToken (pos', inp') len action -> do
+            setPos pos'
+            setInput inp'
+            tok' <- action pos len inp
+            when modifyCache $ setLastToken tok'
+            return tok'
+
+doLineDirective
+   :: Position
+   -> Int
+   -> InputStream
+   -> P Token
+doLineDirective pos len str = do
+   setPos (adjustLineDirective len (takeChars len str) pos)
+   lexToken' False
+
+doIdentifier
+   :: Position
+   -> Int
+   -> InputStream
+   -> P Token
+doIdentifier pos len str = idkwtok (takeChars len str) pos
+
+lexC
+   :: (Token -> P a)
+   -> P a
+lexC cont = do
+   tok' <- lexToken
+   cont tok'
+
+doIntegerLiteral
+   :: Bool
+   -> Int
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doIntegerLiteral u@False r p = token_plus TokLitInt     (f . readLitInteger u r p) p
+   where
+      f (Right (Left li)) = Right li
+      f (Left str)        = Left  str
+      f _                 = error "Lexer.doIntegerLiteral False"
+doIntegerLiteral u@True  r p = token_plus TokLitUserDef (f . readLitInteger u r p) p
+   where
+      f (Right (Right lud)) = Right lud
+      f (Left str)          = Left  str
+      f _                   = error "Lexer.doIntegerLiteral True"
+
+doCharLiteral
+   :: Bool
+   -> Bool
+   -> LitCharType
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doCharLiteral u@False m t p = token TokLitChar    (f . readLitChar u m t p) p
+   where
+      f (Left x) = x
+      f _        = error "Lexer.doCharLiteral False"
+
+doCharLiteral u@True  m t p = token TokLitUserDef (f . readLitChar u m t p) p
+   where
+      f (Right x) = x
+      f _         = error "Lexer.doCharLiteral True"
+
+doFloatLiteral
+   :: Bool
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doFloatLiteral u@False p = token TokLitFloat   (f . readLitFloat u p) p
+   where
+      f (Left x) = x
+      f _        = error "Lexer.doFloatLiteral False"
+doFloatLiteral u@True  p = token TokLitUserDef (f . readLitFloat u p) p
+   where
+      f (Right x) = x
+      f _         = error "Lexer.doFloatLiteral True"
+
+doStringLiteral
+   :: Bool
+   -> Bool
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+doStringLiteral u@False r pos = token TokLitString  (f . readLitString u r pos) pos
+   where
+      f (Left x) = x
+      f _        = error "Lexer.doStringLiteral False"
+doStringLiteral u@True  r pos = token TokLitUserDef (f . readLitString u r pos) pos
+   where
+      f (Right x) = x
+      f _         = error "Lexer.doStringLiteral True"
+
+tok
+   :: Int
+   -> (PosLength -> Token)
+   -> Position
+   -> P Token
+tok len tc pos = return (tc (pos,len))
+
+adjustLineDirective
+   :: Int
+   -> String
+   -> Position
+   -> Position
+adjustLineDirective pragmaLen str pos =
+   offs' `seq` fname' `seq` row' `seq` (position offs' fname' row' 1)
+   where
+      offs'           = (posOffset pos) + pragmaLen
+      str'            = dropWhite . drop 1 $ str
+      (rowStr, str'') = span isDigit str'
+      row'            = read rowStr
+      str'''          = dropWhite str''
+      fnameStr        = takeWhile (/= '"') . drop 1 $ str'''
+      fname           = posFile pos
+      dropWhite       = dropWhile (\c -> c == ' ' || c == '\t')
+      fname'
+         | null str''' || head str''' /= '"' = fname
+         -- try and get more sharing of file name strings
+         | fnameStr == fname                 = fname
+         | otherwise                         = fnameStr
+
+{-# INLINE token_ #-}
+-- token that ignores the string
+token_
+   :: Int
+   -> (PosLength -> Token)
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+token_ len tok' pos _ _ = return (tok' (pos,len))
+
+{-# INLINE token_fail #-}
+-- error token
+token_fail
+   :: String
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+token_fail errmsg pos _ _ = failP pos [ "Lexical Error !", errmsg ]
+
+
+{-# INLINE token #-}
+-- token that uses the string
+token
+   :: (PosLength -> a -> Token)
+   -> (String -> a)
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+token tok' read' pos len str = return (tok' (pos,len) (read' $ takeChars len str))
+
+{-# INLINE token_plus #-}
+-- token that may fail
+token_plus
+   :: (PosLength -> a -> Token)
+   -> (String -> Either String a)
+   -> Position
+   -> Int
+   -> InputStream
+   -> P Token
+token_plus tok' read' pos len str =
+   case read' (takeChars len str) of
+      Left err -> failP pos [ "Lexical error ! ", err ]
+      Right ok -> return $! tok' (pos,len) ok
+
+-- -----------------------------------------------------------------------------
+-- The input type
+
+type AlexInput = (Position,         -- current position,
+                  InputStream)      -- current input string
+
+alexInputPrevChar
+   :: AlexInput
+   -> Char
+alexInputPrevChar _ = error "alexInputPrevChar not used"
+
+-- for alex-3.0
+alexGetByte
+   :: AlexInput
+   -> Maybe (Word8, AlexInput)
+alexGetByte (p,is)
+   | inputStreamEmpty is = Nothing
+   | otherwise           =
+      let (b,s) = takeByte is in
+         -- this is safe for latin-1, but ugly
+         let p' = alexMove p (chr (fromIntegral b)) in
+            p' `seq` Just (b, (p', s))
+
+alexGetChar
+   :: AlexInput
+   -> Maybe (Char,AlexInput)
+alexGetChar (p,is)
+   | inputStreamEmpty is = Nothing
+   | otherwise           =
+      let (c,s) = takeChar is in
+         let p' = alexMove p c in
+            p' `seq` Just (c, (p', s))
+
+alexMove
+   :: Position
+   -> Char
+   -> Position
+alexMove pos ' '  = incPos    pos 1
+alexMove pos '\n' = retPos    pos
+alexMove pos '\r' = incOffset pos 1
+alexMove pos _    = incPos    pos 1
+
+lexicalError
+   :: P a
+lexicalError = do
+   pos <- getPos
+   (c,_) <- liftM takeChar getInput
+   failP pos
+         ["Lexical error !"
+            , "The character " ++ show c ++ " does not fit here."]
+
+parseError
+   :: P a
+parseError = do
+   tok' <- getLastToken
+   failP (posOf tok')
+         ["Syntax error !"
+            , "The symbol `" ++ show tok' ++ "' does not fit here."]
+
+
 }

@@ -56,7 +56,7 @@ module Language.CFamily.C.Syntax.AST (
   -- * Annoated type class
   Annotated(..)
 ) where
-import Language.CFamily.Constants
+import Language.CFamily.C.Constants
 import Language.CFamily.C.Syntax.Ops
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Node

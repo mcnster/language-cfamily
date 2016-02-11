@@ -1,17 +1,24 @@
-{-# LANGUAGE FlexibleInstances, CPP #-}
 module Language.CFamily.C.Analysis.TypeCheck where
 
-import Control.Monad
-import Data.Maybe
-import Language.CFamily.Data
-import Language.CFamily.C.Pretty
-import Language.CFamily.C.Syntax.AST
-import Language.CFamily.Constants
-import Language.CFamily.C.Syntax.Ops
 import Language.CFamily.C.Analysis.Debug()
 import Language.CFamily.C.Analysis.SemRep
 import Language.CFamily.C.Analysis.TypeConversions
 import Language.CFamily.C.Analysis.TypeUtils
+
+import Language.CFamily.C.Constants
+import Language.CFamily.C.DefTable
+import Language.CFamily.C.Pretty
+import Language.CFamily.C.TravMonad
+
+import Language.CFamily.C.Syntax.AST
+import Language.CFamily.C.Syntax.Ops
+
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Node
+import Language.CFamily.Data.Position
+
+import Control.Monad
+import Data.Maybe
 import Text.PrettyPrint.HughesPJ
 
 -- We used to re-implement and export the standard Either instance for

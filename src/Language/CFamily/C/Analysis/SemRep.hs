@@ -55,7 +55,7 @@ where
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.Node
 import Language.CFamily.Data.Position
-import Language.CFamily.C.Syntax
+import Language.CFamily.C.Syntax.AST
 
 import Data.Map (Map)
 import qualified Data.Map as Map

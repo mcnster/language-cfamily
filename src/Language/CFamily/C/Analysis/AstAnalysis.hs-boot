@@ -1,8 +1,7 @@
 module Language.CFamily.C.Analysis.AstAnalysis where
 
 import Language.CFamily.C.Analysis.SemRep
-import Language.CFamily.Data
-
+import Language.CFamily.C.TravMonad
 import Language.CFamily.C.Syntax.AST
 
 data StmtCtx = FunCtx VarDecl

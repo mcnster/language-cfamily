@@ -22,8 +22,12 @@ import Language.CFamily.C.Analysis.SemRep
 import Language.CFamily.C.Analysis.Export
 import Language.CFamily.C.Analysis.NameSpaceMap
 
-import Language.CFamily.Data hiding (empty)
+import Language.CFamily.C.DefTable
 import Language.CFamily.C.Pretty
+
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Name
+import Language.CFamily.Data.Node
 
 import Text.PrettyPrint.HughesPJ
 import Data.Map (Map) ; import qualified Data.Map as Map

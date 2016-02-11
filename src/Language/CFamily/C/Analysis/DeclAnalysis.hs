@@ -24,12 +24,21 @@ module Language.CFamily.C.Analysis.DeclAnalysis (
   tAttr,mkVarName,getOnlyDeclr,nameOfDecl,analyseVarDecl,analyseVarDecl'
 )
 where
-import Language.CFamily.Data
-import Language.CFamily.C.Pretty
-import Language.CFamily.C.Syntax
+
 import {-# SOURCE #-} Language.CFamily.C.Analysis.AstAnalysis (tExpr, ExprSide(..))
-import Language.CFamily.C.Analysis.SemError
-import Language.CFamily.C.Analysis.SemRep
+import                Language.CFamily.C.Analysis.SemError
+import                Language.CFamily.C.Analysis.SemRep
+
+import Language.CFamily.C.Constants
+import Language.CFamily.C.DefTable
+import Language.CFamily.C.TravMonad
+import Language.CFamily.C.Pretty
+
+import Language.CFamily.C.Syntax.AST
+
+import Language.CFamily.Data.Error
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Node
 
 import Data.Foldable as F (foldrM)
 import Control.Monad (liftM,when,ap)

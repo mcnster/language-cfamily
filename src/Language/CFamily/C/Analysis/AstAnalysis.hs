@@ -33,14 +33,16 @@ import Language.CFamily.C.Analysis.DeclAnalysis
 import Language.CFamily.C.Analysis.TypeUtils
 import Language.CFamily.C.Analysis.TypeCheck
 
-import Language.CFamily.Data
-
+import Language.CFamily.C.Constants
+import Language.CFamily.C.DefTable
 import Language.CFamily.C.Pretty
-
 import Language.CFamily.C.Syntax.AST
-import Language.CFamily.Constants
 import Language.CFamily.C.Syntax.Ops
 import Language.CFamily.C.Syntax.Utils
+import Language.CFamily.C.TravMonad
+
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Node
 
 import Text.PrettyPrint.HughesPJ
 import Control.Monad

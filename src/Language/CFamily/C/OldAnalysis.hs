@@ -54,8 +54,6 @@ module Language.CFamily.C.Analysis (
     module Language.CFamily.C.Analysis.DeclAnalysis,
     -- * Debug print
     module Language.CFamily.C.Analysis.Debug,
-    -- * Traversal monad
-    module Language.CFamily.Data.TravMonad
 )
 where
 import Language.CFamily.C.Analysis.SemError
@@ -64,5 +62,3 @@ import Language.CFamily.C.Analysis.AstAnalysis
 import Language.CFamily.C.Analysis.DeclAnalysis
 
 import Language.CFamily.C.Analysis.Debug
-
-import Language.CFamily.Data.TravMonad

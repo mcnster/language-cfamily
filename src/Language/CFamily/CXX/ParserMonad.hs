@@ -18,7 +18,7 @@
 --  typedef'ed type identifiers. We also must deal correctly with scope so we
 --  keep a list of sets of identifiers so we can save the outer scope when we
 --  enter an inner scope.
-module Language.CFamily.Data.ParserMonad where
+module Language.CFamily.CXX.ParserMonad where
 
 import Language.CFamily.Data.Error (internalErr, showErrorInfo,ErrorInfo(..),ErrorLevel(..))
 import Language.CFamily.Data.Position  (Position(..))
@@ -26,7 +26,7 @@ import Language.CFamily.Data.InputStream
 import Language.CFamily.Data.Name    (Name)
 import Language.CFamily.Data.Ident    (Ident)
 
-import Language.CFamily.Token (Token(TokEof))
+import Language.CFamily.CXX.Token
 
 import Control.Monad (liftM, ap)
 import Data.Set  (Set)

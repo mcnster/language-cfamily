@@ -20,9 +20,12 @@ exportEnumType, exportEnumTypeDecl, exportEnumTypeRef,
 )
 where
 
-import Language.CFamily.Data hiding (reverse)
 import Language.CFamily.C.Syntax.AST
 import Language.CFamily.C.Analysis.SemRep
+import Language.CFamily.Data.Ident
+import Language.CFamily.Data.Name
+import Language.CFamily.Data.Node
+
 import Data.Maybe
 
 -- |Export Declarator
