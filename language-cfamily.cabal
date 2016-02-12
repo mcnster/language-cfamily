@@ -64,6 +64,7 @@ Library
    Hs-Source-Dirs:      src
    Exposed-Modules:
                         Language.CFamily.Constants
+                        Language.CFamily.ParserMonad
                         Language.CFamily.Token
                         Language.CFamily.C.Analysis.AstAnalysis
                         Language.CFamily.C.Analysis.Builtins
@@ -81,7 +82,6 @@ Library
                         Language.CFamily.C.DefTable
                         Language.CFamily.C.Lexer
                         Language.CFamily.C.Parser
-                        Language.CFamily.C.ParserMonad
                         Language.CFamily.C.Pretty
                         Language.CFamily.C.Syntax.AST
                         Language.CFamily.C.Syntax.Ops
@@ -90,7 +90,6 @@ Library
 --                        Language.CFamily.CXX.AST
 --                        Language.CFamily.CXX.DefTable
                         Language.CFamily.CXX.Lexer
-                        Language.CFamily.CXX.ParserMonad
 --                        Language.CFamily.CXX.TravMonad
                         Language.CFamily.Data.Error
                         Language.CFamily.Data.Ident

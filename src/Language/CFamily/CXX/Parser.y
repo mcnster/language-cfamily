@@ -1,11 +1,12 @@
 -----------------------------------------------------------------------------
 -- Module      :  Parser.y
--- Copyright   :  (c) 2005-2007 Duncan Coutts
+-- Copyright   :  (c) 2016 Mick Nelso
+--                (c) 2005-2007 Duncan Coutts
 --                (c) 2008 Benedikt Huber
 --                (c) [1999..2004] Manuel M T Chakravarty
 --                Portions copyright 1989, 1990 James A. Roskind
--- License     :  BSD-style
--- Maintainer  :  benedikt.huber@gmail.com
+-- License     :  BSD3
+-- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
 --
 --  Parser for C translation units, which have already been run through the C
@@ -102,15 +103,15 @@ module Language.CFamily.C.Parser.Parser (
 --  !* see `We're being far to liberal here' (... struct definition within structs)
 --  * Documentation isn't complete and consistent yet.
 
-import Prelude    hiding (reverse)
-import qualified Data.List as List
-import Control.Monad (mplus)
-import Language.CFamily.Data
+import Language.CFamily.ParserMonad
+
 import Language.CFamily.C.Parser.Builtin   (builtinTypeNames)
 import Language.CFamily.C.Parser.Lexer     (lexC, parseError)
 import Language.CFamily.C.Parser.Tokens    (Token(..), GnuTok(..), posLenOfTok)
-import Language.CFamily.C.Syntax
 
+import Prelude    hiding (reverse)
+import qualified Data.List as List
+import Control.Monad (mplus)
 }
 -- in order to document the parsers, we have to alias them
 %name translation_unit translation_unit

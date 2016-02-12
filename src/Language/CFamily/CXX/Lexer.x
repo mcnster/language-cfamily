@@ -1,24 +1,23 @@
--- ---------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
 -- Module      :  Lexer.x
--- Copyright   : (c) [1999..2004] Manuel M T Chakravarty
---               (c) 2005 Duncan Coutts
---               (c) 2008 Benedikt Huber
---               (c) 2016 Mick Nelso
+-- Copyright   :  (c) 2016 Mick Nelso
+--                (c) 2008 Benedikt Huber
+--                (c) 2005 Duncan Coutts
+--                (c) [1999..2004] Manuel M T Chakravarty               
 -- License     :  BSD3
 -- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
 --
 -- Lexer for C++ files, after being processed by the C++ preprocessor.
 --
--- ---------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
 
 {
 module Language.CFamily.CXX.Lexer where
 
 import Language.CFamily.Constants
+import Language.CFamily.ParserMonad
 import Language.CFamily.Token
-
-import Language.CFamily.CXX.ParserMonad
 
 import Language.CFamily.Data.Ident
 import Language.CFamily.Data.InputStream

@@ -5,7 +5,7 @@
 --                (c) 2008 Benedikt Huber
 --                (c) [1999..2004] Manuel M T Chakravarty
 --                Portions copyright 1989, 1990 James A. Roskind
--- License     :  BSD-style
+-- License     :  BSD3
 -- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
 --
@@ -106,12 +106,11 @@ module Language.CFamily.C.Parser (
 --  * Documentation isn't complete and consistent yet.
 
 import Language.CFamily.Constants
+import Language.CFamily.ParserMonad
 import Language.CFamily.Token
 
 import Language.CFamily.C.Builtin   (builtinTypeNames)
 import Language.CFamily.C.Lexer     (lexC, parseError)
-import Language.CFamily.C.ParserMonad (P, failP, execParser, getNewName, addTypedef, shadowTypedef, getCurrentPosition,
-                                      enterScope, leaveScope, getLastToken, getSavedToken, ParseError(..))
 import Language.CFamily.C.Syntax.AST
 
 import Language.CFamily.Data.Ident

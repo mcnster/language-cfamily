@@ -1,9 +1,9 @@
 -- ----------------------------------------------------------------------------
 -- Module      :  Lexer.x
--- Copyright   :  (c) [1999..2004] Manuel M T Chakravarty
---                (c) 2005 Duncan Coutts
+-- Copyright   :  (c) 2016 Mick Nelso
 --                (c) 2008 Benedikt Huber
---                (c) 2016 Mick Nelso
+--                (c) 2005 Duncan Coutts
+--                (c) [1999..2004] Manuel M T Chakravarty
 -- License     :  BSD3
 -- Maintainer  :  micknelso@gmail.com
 -- Portability :  portable
@@ -52,9 +52,8 @@
 module Language.CFamily.C.Lexer (lexC, parseError) where
 
 import Language.CFamily.Constants
+import Language.CFamily.ParserMonad
 import Language.CFamily.Token
-
-import Language.CFamily.C.ParserMonad
 
 import Language.CFamily.Data.Ident    (mkIdent)
 import Language.CFamily.Data.InputStream
